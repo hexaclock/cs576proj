@@ -1,5 +1,5 @@
 CC       = clang++
-SERVER   = server
+#SERVER   = server
 CLIENT   = client
 SRC1     = Server.cpp jsoncpp.cpp
 SRC2     = Client.cpp jsoncpp.cpp
@@ -15,7 +15,7 @@ all: $(SERVER) $(CLIENT)
 $(SERVER):
 	$(CC) $(CXXFLAGS) $(SRC1) -o $(SERVER)
 
-$(CLIENT): 
+$(CLIENT):
 	$(CC) $(CXXFLAGS) $(SRC2) -o $(CLIENT)
 
 clean:
