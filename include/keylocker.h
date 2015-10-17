@@ -1,6 +1,9 @@
 #ifndef _KEYLOCKER_H_
 #define _KEYLOCKER_H_
 
+/*C stuff*/
+#include <stdlib.h>
+/*C++ stuff*/
 #include <fstream>
 #include <iostream>
 #include <openssl/bio.h>
@@ -47,8 +50,8 @@ class Server
 class JsonParsing
 {
     public:
-        bool readJson(Json::Value* root, std::string dbName);
-        bool writeJson(Json::Value* root, std::string dbName);
+        static bool readJson(Json::Value* root, std::string dbName);
+        static bool writeJson(Json::Value* root, std::string dbName);
 };
 
 #endif

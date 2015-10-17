@@ -10,25 +10,41 @@ void panic(std::string msg, int code)
 
 int main(int argc, char **argv)
 {
+  char *tmp;
   std::string username;
+  std::string homepath;
   std::string servname;
   std::string dbname;
+  std::string dbpath;
   Json::Value passdb;
 
-  if (argc < 2)
-    panic("usage: " + (std::string)argv[0] + " <username>", 1);
-  username = (std::string)argv[1];
-  dbname = username + ".db";
+  /*if (argc < 2)
+    panic("usage: " + (std::string)argv[0] + " <username>", 1);*/
+  
+  /*
+   *we'd use secure_getenv, but linux lab is out of date 
+   *and doesn't have latest
+   *glibc :( 
+   */
+  if ( (tmp = getenv("USER")) != NULL )
+    username = std::string(tmp);
+  if ( (tmp = getenv("HOME")) != NULL )
+    homepath = std::string(tmp);
 
-  if (!JsonParsing::readJson(&passdb,dbname))
-    panic("Could not open user's password database file", 2);
+  dbname = "." + username + " _keylocker" + ".db";
+  dbpath = homepath + "/" + dbname;
 
+  if (!JsonParsing::readJson(&passdb,dbpath))
+    {
+      std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+      passdb["username"] = username;
+    }
   /*detect if new file, set username if so*/
-  if (passdb.get("username","BLARGH").asString() == "BLARGH")
+  if (!passdb.isMember("username"))
     passdb["username"] = username;
 
-  if (!JsonParsing::writeJson(&passdb,dbname))
-    panic("Failed to write to user's password database file", 3);
+  if (!JsonParsing::writeJson(&passdb,dbpath))
+    panic("[-] Failed to write to user's password database file!", 3);
 
   return 0;
 }

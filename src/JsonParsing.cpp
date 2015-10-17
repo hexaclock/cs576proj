@@ -9,7 +9,7 @@
  *      dbName
  * returns: true on success, false otherwise
  */
-static bool JsonParsing::readJson(Json::Value* root, std::string dbName)
+bool JsonParsing::readJson(Json::Value* root, std::string dbName)
 {
     Json::Reader reader;
     std::ifstream passdb_file;
@@ -34,7 +34,7 @@ static bool JsonParsing::readJson(Json::Value* root, std::string dbName)
  *      called dbName
  * returns: true on success, false otherwise
  */
-static bool JsonParsing::writeJson(Json::Value* root, std::string dbName)
+bool JsonParsing::writeJson(Json::Value* root, std::string dbName)
 {
 #ifdef READABLE
     Json::StyledWriter writer;
