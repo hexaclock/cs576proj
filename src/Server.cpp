@@ -7,11 +7,12 @@ public:
   int start();
   bool addUser(std::string username, std::string pubkey)
   {
-    
-  }
-  bool deleteUser(std::string username);
+    return true;
+  };
+  bool deleteUser(std::string username)
   {
-  }
+    return true;
+  };
   
 private:
   bool started;
