@@ -25,22 +25,21 @@ int main(int argc, char **argv)
   std::string username;
   std::string servname;
   std::string dbname;
-  Json::Value passdb_root;
-  Json::Parsing jsonparser;
+  Json::Value passdb;
 
   if (argc < 2)
     panic("usage: " + (std::string)argv[0] + " <username>", 1);
   username = (std::string)argv[1];
   dbname = username + ".db";
 
-  if (!jsonparser.readJson(&root,dbname))
+  if (!JsonParsing::readJson(&passdb,dbname))
     panic("Could not open user's password database file", 2);
 
   /*detect if new file, set username if so*/
-  if (passdb_root.get("username",NULL).asString() == NULL)
-    passdb_root["username"] = username;
+  if (passdb.get("username","BLARGH").asString() == "BLARGH")
+    passdb["username"] = username;
 
-  if (!jsonparser.write(&root,dbname))
+  if (!JsonParsing::writeJson(&passdb,dbname))
     panic("Failed to write to user's password database file", 3);
 
   return 0;
