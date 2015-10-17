@@ -3,6 +3,10 @@
 
 /*C stuff*/
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <errno.h>
 /*C++ stuff*/
 #include <fstream>
 #include <iostream>
