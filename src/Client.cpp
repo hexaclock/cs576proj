@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
   if (!jsonparser.readJson(&root,dbname))
     panic("Could not open user's password database file", 2);
-  
+
   /*detect if new file, set username if so*/
   if (passdb_root.get("username",NULL).asString() == NULL)
     passdb_root["username"] = username;
