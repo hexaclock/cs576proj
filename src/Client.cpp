@@ -2,18 +2,6 @@
 #include "keylocker.h"
 #include "json/json.h"
 
-class Client
-{
-    public:
-        int connect(std::string servname);
-        bool auth();
-        std::string newEntry();
-        bool editEntry(std::string euuid);
-        bool deleteEntry(std::string euuid);
-    private:
-
-};
-
 void panic(std::string msg, int code)
 {
     std::cout << msg << std::endl;
