@@ -22,25 +22,21 @@ void panic(std::string msg, int code)
 
 int main(int argc, char **argv)
 {
+    Json::Value root;   // will contains the root value after parsing.
+    Json::Reader reader;
+    std::ifstream passdb_file;
+
     if (argc < 2)
         panic("usage: " + (std::string)argv[0] + " <username>", 1);
 
-    Json::Value root;
-    Json::Reader reader;
+    passdb_file.open("bob.db", std::ifstream::binary);
+    if ( !reader.parse( passdb_file, root, false ) )
+      {
+	std::cout  << reader.getFormattedErrorMessages() << std::endl;
+      }
 
-    std::fstream db;
-    std::cout << (std::string)argv[1] + ".db" << std::endl;
-    db.open((std::string)argv[1] + ".db", std::fstream::binary);
-    reader.parse(db, root, false);
-    /*
-    if (!reader.parse(db, root, false))
-    {
-        panic("Failed to parse Json!", 2);
-    }
-    */
+    std::string encoding = root.get("testkey", "UTF-8" ).asString();
+    std::cout << encoding << std::endl;
 
-    std::cout << root;
-
-    db.close();
     return 0;
 }
