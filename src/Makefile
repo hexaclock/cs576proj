@@ -1,14 +1,13 @@
 CC       = clang++
 SERVER   = server
 CLIENT   = client
-SRC1     = Server.cpp
-SRC2     = Client.cpp
+SRC1     = Server.cpp jsoncpp.cpp
+SRC2     = Client.cpp jsoncpp.cpp
 OBJ1     = $(SRC1:.cpp=.o)
 OBJ2     = $(SRC2:.cpp=.o)
 OPENSSL  = /usr/include/openssl
 IPATH    = ../include
-JSONCPP  = ../jsoncpp/include
-CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -I$(JSONCPP) -g -O2 -Wall -Wextra -pedantic -std=c++11
+CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -g -O2 -Wall -Wextra -pedantic -std=c++11
 RM       = rm -f
 
 all: $(SERVER) $(CLIENT)
