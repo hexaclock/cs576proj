@@ -7,7 +7,8 @@ OBJ1     = $(SRC1:.cpp=.o)
 OBJ2     = $(SRC2:.cpp=.o)
 OPENSSL  = /usr/include/openssl
 IPATH    = ../include
-CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -g -O2 -Wall -Wextra -pedantic -std=c++11
+JSONCPP  = ../jsoncpp/include
+CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -I$(JSONCPP) -g -O2 -Wall -Wextra -pedantic -std=c++11
 RM       = rm -f
 
 all: $(SERVER) $(CLIENT)
