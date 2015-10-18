@@ -35,6 +35,10 @@ void showterm()
     tcsetattr(STDIN_FILENO, TCSANOW, &tty);
 }
 
+/* pre: takes in a Json::Value* passdb
+ * post: reads in user input and creates a new keylocker database entry with the
+ *      provided input in passdb
+ */
 void add_entry(Json::Value *passdb)
 {
 
@@ -43,8 +47,6 @@ void add_entry(Json::Value *passdb)
     std::string password;
     std::string notes;
     std::string entry;
-
-    //JsonParsing::readJson(&passdb,dbpath);
 
     std::cout<<"Service:  ";
     std::getline(std::cin,service);
@@ -67,6 +69,41 @@ void add_entry(Json::Value *passdb)
     (*passdb)["dbentry"][entry]["username"] = username;
     (*passdb)["dbentry"][entry]["password"] = password;
     (*passdb)["dbentry"][entry]["notes"] = notes;
+}
+
+/* pre: takes in a Json::Value* passdb and a std::string request
+ * post: if request is not empty prints out the keylocker database entry for key
+ *      request, else prints out all the keylocker database entries in passdb
+ */
+void get_entry(Json::Value *passdb, std::string request)
+{
+    Json::Value val;
+    Json::StreamWriterBuilder builder;
+    std::string line;
+
+    //This line was recommended on the internet but I don't think it changes
+    //  output
+    //builder.settings_["indentation"] = "";
+
+    if (!request.empty()) /* get where key=request */
+    {
+        val = (*passdb)["dbentry"][request]["service"];
+        line = "Service:\t" + Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][request]["username"];
+        line += "\n\tUsername:\t" + Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][request]["password"];
+        line += "\n\tPassword:\t" + Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][request]["notes"];
+        line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
+
+        std::cout << line << std::endl;
+    }
+    else /* get all */
+    {
+    }
 }
 
 /* pre: takes in int argc and char** argv command line arguments
@@ -105,7 +142,7 @@ int main(int argc, char **argv)
 
     dbname = username + "_keylocker" + ".db";
     kldir  = homepath + "/" + ".keylocker";
-    std::cout << kldir << std::endl;
+    std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
     if ( (result = mkdir(kldir.c_str(),0700)) == -1 )
         if (errno != EEXIST)
             panic("Failed to create .keylocker directory in home directory",-2);
@@ -124,6 +161,15 @@ int main(int argc, char **argv)
     /*if 'add' is the user's command*/
     if (!strcmp(argv[1], "add"))
         add_entry(&passdb);
+    else if (!strcmp(argv[1], "get")) /* else if 'get' is the user's command */
+    {
+        if (argc == 4) /* prg get service username */
+            get_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
+        else if (argc == 2) /* prg get */
+            get_entry(&passdb, "");
+        else
+            panic("usage: " + (std::string)argv[0] + " get [<service> <username>]", 1);
+    }
 
     if (!JsonParsing::writeJson(&passdb,dbpath))
         panic("[-] Failed to write to user's password database file!", 3);
