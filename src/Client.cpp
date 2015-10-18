@@ -78,6 +78,7 @@ void add_entry(Json::Value *passdb)
 void get_entry(Json::Value *passdb, std::string request)
 {
     Json::Value val;
+    Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
     std::string line;
 
@@ -103,6 +104,29 @@ void get_entry(Json::Value *passdb, std::string request)
     }
     else /* get all */
     {
+        it = (*passdb)["dbentry"].begin();
+        for (; it != (*passdb)["dbentry"].end(); it++)
+        {
+            //this gets the key from the iterator, but returns it in quotes
+            request = Json::writeString(builder, it.key());
+
+            //this removes the quotes
+            request.erase(remove(request.begin(), request.end(), '\"'), request.end());
+
+            val = (*passdb)["dbentry"][request]["service"];
+            line = "Service:\t" + Json::writeString(builder, val);
+
+            val = (*passdb)["dbentry"][request]["username"];
+            line += "\n\tUsername:\t" + Json::writeString(builder, val);
+
+            val = (*passdb)["dbentry"][request]["password"];
+            line += "\n\tPassword:\t" + Json::writeString(builder, val);
+
+            val = (*passdb)["dbentry"][request]["notes"];
+            line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
+
+            std::cout << line << std::endl;
+        }
     }
 }
 

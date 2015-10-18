@@ -10,6 +10,8 @@
 /*C++ stuff*/
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+#include <string>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
