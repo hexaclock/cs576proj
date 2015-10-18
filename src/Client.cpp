@@ -4,8 +4,6 @@
 
 #include <termios.h>
 
-Json::Value passdb;
-
 /* pre: takes in an std::string msg and int code
  * post: prints msg to stdout and exits with error code code
  */
@@ -37,7 +35,7 @@ void showterm()
     tcsetattr(STDIN_FILENO, TCSANOW, &tty);
 }
 
-void add_entry()
+void add_entry(Json::Value *passdb)
 {
 
     std::string service;
@@ -65,10 +63,10 @@ void add_entry()
 
     entry = service + "_" + username;
 
-    passdb["dbentry"][entry]["service"] = service;
-    passdb["dbentry"][entry]["username"] = username;
-    passdb["dbentry"][entry]["password"] = password;
-    passdb["dbentry"][entry]["notes"] = notes;
+    (*passdb)["dbentry"][entry]["service"] = service;
+    (*passdb)["dbentry"][entry]["username"] = username;
+    (*passdb)["dbentry"][entry]["password"] = password;
+    (*passdb)["dbentry"][entry]["notes"] = notes;
 }
 
 /* pre: takes in int argc and char** argv command line arguments
@@ -85,6 +83,7 @@ int main(int argc, char **argv)
     std::string dbname;
     std::string dbpath;
     std::string kldir;
+    Json::Value passdb;
 
     if (argc < 2)
         panic("usage: " + (std::string)argv[0] + " <command> <options>", 1);
@@ -124,7 +123,7 @@ int main(int argc, char **argv)
 
     /*if 'add' is the user's command*/
     if (!strcmp(argv[1], "add"))
-        add_entry();
+        add_entry(&passdb);
 
     if (!JsonParsing::writeJson(&passdb,dbpath))
         panic("[-] Failed to write to user's password database file!", 3);
