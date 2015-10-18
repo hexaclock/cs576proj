@@ -71,16 +71,39 @@ void add_entry(Json::Value *passdb)
     (*passdb)["dbentry"][entry]["notes"] = notes;
 }
 
+/* pre: takes in a Json::Value* passdb and an std::string dbentry_key
+ * post: prints out the dbentry in the keylocker database pointed to by passdb
+ *      that has the key dbentry_key
+ */
+void print_entry(Json::Value *passdb, std::string dbentry_key)
+{
+    Json::Value val;
+    Json::StreamWriterBuilder builder;
+    std::string line;
+
+    val = (*passdb)["dbentry"][dbentry_key]["service"];
+    line = "Service:\t" + Json::writeString(builder, val);
+
+    val = (*passdb)["dbentry"][dbentry_key]["username"];
+    line += "\n\tUsername:\t" + Json::writeString(builder, val);
+
+    val = (*passdb)["dbentry"][dbentry_key]["password"];
+    line += "\n\tPassword:\t" + Json::writeString(builder, val);
+
+    val = (*passdb)["dbentry"][dbentry_key]["notes"];
+    line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
+
+    std::cout << line << std::endl;
+}
+
 /* pre: takes in a Json::Value* passdb and a std::string request
  * post: if request is not empty prints out the keylocker database entry for key
  *      request, else prints out all the keylocker database entries in passdb
  */
 void get_entry(Json::Value *passdb, std::string request)
 {
-    Json::Value val;
     Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
-    std::string line;
 
     //This line was recommended on the internet but I don't think it changes
     //  output
@@ -88,19 +111,7 @@ void get_entry(Json::Value *passdb, std::string request)
 
     if (!request.empty()) /* get where key=request */
     {
-        val = (*passdb)["dbentry"][request]["service"];
-        line = "Service:\t" + Json::writeString(builder, val);
-
-        val = (*passdb)["dbentry"][request]["username"];
-        line += "\n\tUsername:\t" + Json::writeString(builder, val);
-
-        val = (*passdb)["dbentry"][request]["password"];
-        line += "\n\tPassword:\t" + Json::writeString(builder, val);
-
-        val = (*passdb)["dbentry"][request]["notes"];
-        line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
-
-        std::cout << line << std::endl;
+        print_entry(passdb, request);
     }
     else /* get all */
     {
@@ -113,19 +124,7 @@ void get_entry(Json::Value *passdb, std::string request)
             //this removes the quotes
             request.erase(remove(request.begin(), request.end(), '\"'), request.end());
 
-            val = (*passdb)["dbentry"][request]["service"];
-            line = "Service:\t" + Json::writeString(builder, val);
-
-            val = (*passdb)["dbentry"][request]["username"];
-            line += "\n\tUsername:\t" + Json::writeString(builder, val);
-
-            val = (*passdb)["dbentry"][request]["password"];
-            line += "\n\tPassword:\t" + Json::writeString(builder, val);
-
-            val = (*passdb)["dbentry"][request]["notes"];
-            line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
-
-            std::cout << line << std::endl;
+            print_entry(passdb, request);
         }
     }
 }
