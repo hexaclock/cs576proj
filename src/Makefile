@@ -2,7 +2,7 @@ CC       = clang++
 #SERVER   = server
 CLIENT   = client
 SRC1     = Server.cpp jsoncpp.cpp JsonParsing.cpp
-SRC2     = Client.cpp jsoncpp.cpp JsonParsing.cpp
+SRC2     = Client.cpp jsoncpp.cpp JsonParsing.cpp Crypto.cpp
 OBJ1     = $(SRC1:.cpp=.o)
 OBJ2     = $(SRC2:.cpp=.o)
 OPENSSL  = /usr/include/openssl

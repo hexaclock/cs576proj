@@ -142,8 +142,12 @@ int main(int argc, char **argv)
     std::string servname;
     std::string dbname;
     std::string dbpath;
+    std::string dbpass;
     std::string kldir;
+    bool newfile;
     Json::Value passdb;
+
+    newfile = false;
 
     if (argc < 2)
         panic("usage: " + (std::string)argv[0] + " <command> <options>", 1);
@@ -167,19 +171,45 @@ int main(int argc, char **argv)
     kldir  = homepath + "/" + ".keylocker";
     std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
     if ( (result = mkdir(kldir.c_str(),0700)) == -1 )
+      {
         if (errno != EEXIST)
-            panic("Failed to create .keylocker directory in home directory",-2);
+	  panic("Failed to create .keylocker directory in home directory",-2);
+      }
+    else
+      newfile = true;
     dbpath = kldir + "/" + dbname;
 
-    if (!JsonParsing::readJson(&passdb,dbpath))
-    {
-        std::cout<<"User's password database file not found... Creating new file"<<std::endl;
-        passdb["dbuser"] = username;
-    }
+    if (newfile)
+      {
+	std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+	std::cout<<"New database password: ";
+	hideterm();
+	std::getline(std::cin,dbpass);
+	showterm();
+	std::cout<<std::endl;
+	//std::cout<<"Generating RSA keypair..."<<std::endl;
+	//KLCrypto::generateRSA(kldir+"/");
+	passdb["dbuser"] = username;
+      }
+    else
+      {
+	std::cout<<"Database password: ";
+	hideterm();
+	std::getline(std::cin,dbpass);
+	showterm();
+	std::cout<<std::endl;
+      }
+
+    if (!newfile)
+      if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
+	{
+	  std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+	  passdb["dbuser"] = username;
+	}
 
     /*detect if new file, set username if so*/
-    if (!passdb.isMember("dbuser"))
-        passdb["dbuser"] = username;
+    /*if (!passdb.isMember("dbuser"))
+      passdb["dbuser"] = username;*/
 
     /*if 'add' is the user's command*/
     if (!strcmp(argv[1], "add"))
@@ -194,7 +224,7 @@ int main(int argc, char **argv)
             panic("usage: " + (std::string)argv[0] + " get [<service> <username>]", 1);
     }
 
-    if (!JsonParsing::writeJson(&passdb,dbpath))
+    if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
         panic("[-] Failed to write to user's password database file!", 3);
 
     return 0;
