@@ -29,6 +29,9 @@ The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylock
 }
 ```
 
+##Documentation
+The `doc/` directory contains LaTeX documents for the Proposal and Design documents. The Makefile in `src/` has a target for compiling the documentation.
+
 ##Contributing
 The tasks for each assignment deadline have been setup as issues.
 These can be discussed remotely by commenting on them.

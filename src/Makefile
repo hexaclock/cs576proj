@@ -10,6 +10,10 @@ IPATH    = ../include
 CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -g -O2 -Wall -Wextra -pedantic -std=c++11
 RM       = rm -f
 
+# Latex things for docs
+DOCSDIR  = ../doc
+PDFTEX   = pdflatex -shell-escape -interaction=nonstopmode -file-line-error -output-directory $(DOCSDIR)
+
 all: $(SERVER) $(CLIENT)
 
 $(SERVER):
@@ -20,8 +24,19 @@ $(CLIENT):
 
 clean:
 	-$(RM) *.o *~ \#*
-	-$(RM) $(SERVER) $(CLIENT)
+	-$(RM) ../doc/*.aux ../doc/*.log
 
 fclean: clean
+	-$(RM) $(SERVER) $(CLIENT)
+	-$(RM) ../doc/*.pdf
 
 re: fclean all
+
+# make latex docs in ../doc
+docs:
+	$(PDFTEX) $(DOCSDIR)/proposal.tex
+	$(PDFTEX) $(DOCSDIR)/design.tex
+
+# make a tar.gz with docs in ../../
+submit: fclean docs clean
+	tar -cvzf ../../cs576_project.tar.gz ../*
