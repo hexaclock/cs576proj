@@ -37,3 +37,8 @@ src/server
 \#*
 *~
 *.swp
+
+# Documentation outputs from pdflatex
+doc/*.aux
+doc/*.log
+doc/*.pdf
