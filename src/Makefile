@@ -9,6 +9,8 @@ OPENSSL  = /usr/include/openssl
 IPATH    = ../include
 CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -g -O2 -Wall -Wextra -pedantic -std=c++11
 RM       = rm -f
+DOCSPATH = ../doc
+DOCS     =
 
 all: $(SERVER) $(CLIENT)
 
@@ -20,8 +22,14 @@ $(CLIENT):
 
 clean:
 	-$(RM) *.o *~ \#*
-	-$(RM) $(SERVER) $(CLIENT)
 
 fclean: clean
+	-$(RM) $(SERVER) $(CLIENT)
 
 re: fclean all
+
+docs:
+	pdftex -interaction=batchmode $(DOCS)
+
+submit: fclean docs
+	tar -cvzf ../../cs576_project.tar.gz ../*
