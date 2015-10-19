@@ -50,14 +50,17 @@ void add_entry(Json::Value *passdb)
 
     std::cout<<"Service:  ";
     std::getline(std::cin,service);
+    cin.sync();
 
     std::cout<<"Username: ";
     std::getline(std::cin,username);
+	cin.sync();
 
     std::cout<<"Password: ";
     hideterm();
     std::getline(std::cin,password);
     showterm();
+	cin.sync();
 
     std::cout<<"\nNotes:    ";
     std::getline(std::cin,notes);
@@ -127,6 +130,11 @@ void get_entry(Json::Value *passdb, std::string request)
             print_entry(passdb, request);
         }
     }
+}
+
+void delete_entry(Json::Value *passdb, std::string request)
+{
+
 }
 
 /* pre: takes in int argc and char** argv command line arguments
@@ -210,6 +218,11 @@ int main(int argc, char **argv)
     /*detect if new file, set username if so*/
     /*if (!passdb.isMember("dbuser"))
       passdb["dbuser"] = username;*/
+if ((*passdb)["dbentry"].isMember(service_username))
+	(*passdb)["dbentry"].removeMember(service_username);
+else
+	print no such entry
+
 
     /*if 'add' is the user's command*/
     if (!strcmp(argv[1], "add"))
