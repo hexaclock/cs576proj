@@ -50,21 +50,22 @@ void add_entry(Json::Value *passdb)
 
     std::cout<<"Service:  ";
     std::getline(std::cin,service);
-    cin.sync();
+	std::cin.sync();
 
     std::cout<<"Username: ";
     std::getline(std::cin,username);
-	cin.sync();
+	std::cin.sync();
 
     std::cout<<"Password: ";
     hideterm();
     std::getline(std::cin,password);
     showterm();
-	cin.sync();
+	std::cin.sync();
 
     std::cout<<"\nNotes:    ";
     std::getline(std::cin,notes);
     std::cout<<"\n";
+    std::cin.sync();
 
     entry = service + "_" + username;
 
@@ -132,9 +133,20 @@ void get_entry(Json::Value *passdb, std::string request)
     }
 }
 
-void delete_entry(Json::Value *passdb, std::string request)
-{
+/* pre: takes in a Json::Value* passdb and a std::string request
+ * post: delete the entry given by request
+ * return: 0 on success, 1 on no such entry
+ */
 
+int delete_entry(Json::Value *passdb, std::string request)
+{
+	if ((*passdb)["dbentry"].isMember(request))
+	{
+		(*passdb)["dbentry"].removeMember(request);
+		return 0;
+	}
+	else
+		return 1;
 }
 
 /* pre: takes in int argc and char** argv command line arguments
@@ -216,15 +228,9 @@ int main(int argc, char **argv)
 	}
 
     /*detect if new file, set username if so*/
-    /*if (!passdb.isMember("dbuser"))
-      passdb["dbuser"] = username;*/
-if ((*passdb)["dbentry"].isMember(service_username))
-	(*passdb)["dbentry"].removeMember(service_username);
-else
-	print no such entry
-
-
-    /*if 'add' is the user's command*/
+    /*   if (!passdb.isMember("dbuser"))
+		               passdb["dbuser"] = username;*/
+	/*if 'add' is the user's command*/
     if (!strcmp(argv[1], "add"))
         add_entry(&passdb);
     else if (!strcmp(argv[1], "get")) /* else if 'get' is the user's command */
@@ -236,6 +242,19 @@ else
         else
             panic("usage: " + (std::string)argv[0] + " get [<service> <username>]", 1);
     }
+	else if (!strcmp(argv[1], "delete"))
+	{
+		if (argc == 4)
+		{
+			int ret = delete_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
+			if (ret == 0)
+				std::cout << "Delete entry successfully" << std::endl;
+			else if (ret == 1)
+				panic("No such entry, please check your input", 2);
+		}
+		else
+			panic("usage: " + (std::string)argv[0] + " delete [<service> <username>]", 1);
+	}
 
     if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
         panic("[-] Failed to write to user's password database file!", 3);
