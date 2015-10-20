@@ -111,7 +111,10 @@ void get_entry(Json::Value *passdb, std::string request)
 
     if (!request.empty()) /* get where key=request */
     {
-        print_entry(passdb, request);
+        if ((*passdb)["dbentry"].isMember(request))
+            print_entry(passdb, request);
+        else
+            std::cout << "No entry found for: " << request << std::endl;
     }
     else /* get all */
     {
@@ -171,41 +174,41 @@ int main(int argc, char **argv)
     kldir  = homepath + "/" + ".keylocker";
     std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
     if ( (result = mkdir(kldir.c_str(),0700)) == -1 )
-      {
+    {
         if (errno != EEXIST)
-	  panic("Failed to create .keylocker directory in home directory",-2);
-      }
+            panic("Failed to create .keylocker directory in home directory",-2);
+    }
     else
-      newfile = true;
+        newfile = true;
     dbpath = kldir + "/" + dbname;
 
     if (newfile)
-      {
-	std::cout<<"User's password database file not found... Creating new file"<<std::endl;
-	std::cout<<"New database password: ";
-	hideterm();
-	std::getline(std::cin,dbpass);
-	showterm();
-	std::cout<<std::endl;
-	//std::cout<<"Generating RSA keypair..."<<std::endl;
-	//KLCrypto::generateRSA(kldir+"/");
-	passdb["dbuser"] = username;
-      }
+    {
+        std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+        std::cout<<"New database password: ";
+        hideterm();
+        std::getline(std::cin,dbpass);
+        showterm();
+        std::cout<<std::endl;
+        //std::cout<<"Generating RSA keypair..."<<std::endl;
+        //KLCrypto::generateRSA(kldir+"/");
+        passdb["dbuser"] = username;
+    }
     else
-      {
-	std::cout<<"Database password: ";
-	hideterm();
-	std::getline(std::cin,dbpass);
-	showterm();
-	std::cout<<std::endl;
-      }
+    {
+        std::cout<<"Database password: ";
+        hideterm();
+        std::getline(std::cin,dbpass);
+        showterm();
+        std::cout<<std::endl;
+    }
 
     if (!newfile)
-      if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
-	{
-	  std::cout<<"User's password database file not found... Creating new file"<<std::endl;
-	  passdb["dbuser"] = username;
-	}
+        if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
+        {
+            std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+            passdb["dbuser"] = username;
+        }
 
     /*detect if new file, set username if so*/
     /*if (!passdb.isMember("dbuser"))
