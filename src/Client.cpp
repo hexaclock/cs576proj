@@ -50,17 +50,17 @@ void add_entry(Json::Value *passdb)
 
     std::cout<<"Service:  ";
     std::getline(std::cin,service);
-	std::cin.sync();
+    std::cin.sync();
 
     std::cout<<"Username: ";
     std::getline(std::cin,username);
-	std::cin.sync();
+    std::cin.sync();
 
     std::cout<<"Password: ";
     hideterm();
     std::getline(std::cin,password);
     showterm();
-	std::cin.sync();
+    std::cin.sync();
 
     std::cout<<"\nNotes:    ";
     std::getline(std::cin,notes);
@@ -147,13 +147,13 @@ void get_entry(Json::Value *passdb, std::string request)
  */
 int delete_entry(Json::Value *passdb, std::string request)
 {
-	if ((*passdb)["dbentry"].isMember(request))
-	{
+    if ((*passdb)["dbentry"].isMember(request))
+    {
         (*passdb)["dbentry"].removeMember(request);
         return 0;
-	}
-	else
-		return 1;
+    }
+    else
+        return 1;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -169,13 +169,13 @@ int update_entry(Json::Value *passdb, std::string request)
     std::string entry;
     std::string delimiter = "_";
     std::string temp;
-    
+
     //split string request and parse the service and username
     temp = request;
     service = temp.substr(0, temp.find(delimiter));
     temp.erase(0, temp.find(delimiter) + delimiter.length());
     username = temp;
-    
+
     if ((*passdb)["dbentry"].isMember(request))
     {
         std::cout<<"Password: ";
@@ -183,19 +183,19 @@ int update_entry(Json::Value *passdb, std::string request)
         std::getline(std::cin,password);
         showterm();
         std::cin.sync();
-        
+
         std::cout<<"\nNotes:    ";
         std::getline(std::cin,notes);
         std::cout<<"\n";
         std::cin.sync();
-        
+
         entry = request;
-        
+
         (*passdb)["dbentry"][entry]["service"] = service;
         (*passdb)["dbentry"][entry]["username"] = username;
         (*passdb)["dbentry"][entry]["password"] = password;
         (*passdb)["dbentry"][entry]["notes"] = notes;
-        
+
         return 0;
     }
     else
@@ -282,8 +282,8 @@ int main(int argc, char **argv)
 
     /*detect if new file, set username if so*/
     /*   if (!passdb.isMember("dbuser"))
-		               passdb["dbuser"] = username;*/
-	/*if 'add' is the user's command*/
+         passdb["dbuser"] = username;*/
+    /*if 'add' is the user's command*/
     if (!strcmp(argv[1], "add"))
         add_entry(&passdb);
     else if (!strcmp(argv[1], "get")) /* else if 'get' is the user's command */
@@ -295,13 +295,13 @@ int main(int argc, char **argv)
         else
             panic("usage: " + (std::string)argv[0] + " get [<service> <username>]", 1);
     }
-	else if (!strcmp(argv[1], "delete"))
-	{
-		if (argc == 4)
-		{
-			std::string confirm;
+    else if (!strcmp(argv[1], "delete"))
+    {
+        if (argc == 4)
+        {
+            std::string confirm;
             std::cout << "Are you sure to delete " + (std::string)argv[2] + "_" + (std::string)argv[3] + " entry? (yes/no):";
-			while (1)
+            while (1)
             {
                 getline(std::cin, confirm);
                 std::cin.sync();
@@ -309,11 +309,11 @@ int main(int argc, char **argv)
                 {
                     int ret = delete_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
                     if (ret == 0)
-					{
+                    {
                         std::cout << "Delete entry successfully" << std::endl;
-						break;
-					}
-					else if (ret == 1)
+                        break;
+                    }
+                    else if (ret == 1)
                         panic("No such entry, please check your input", 2);
                 }
                 else if (!strcmp(confirm.c_str(), "no"))
@@ -321,10 +321,10 @@ int main(int argc, char **argv)
                 else
                     std::cout << "Please type 'yes' or 'no': ";
             }
-		}
-		else
-			panic("usage: " + (std::string)argv[0] + " delete [<service> <username>]", 1);
-	}
+        }
+        else
+            panic("usage: " + (std::string)argv[0] + " delete [<service> <username>]", 1);
+    }
     else if (!strcmp(argv[1], "edit"))
     {
         if (argc == 4)
