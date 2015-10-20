@@ -68,6 +68,11 @@ void add_entry(Json::Value *passdb)
     std::cin.sync();
 
     entry = service + "_" + username;
+    // If an entry is exist, user cannot overwrite it. This will prevent some fault operation.
+    if ((*passdb)["dbentry"].isMember(entry))
+    {
+        panic("Entry is already exist", 4);
+    }
 
     (*passdb)["dbentry"][entry]["service"] = service;
     (*passdb)["dbentry"][entry]["username"] = username;
@@ -140,16 +145,61 @@ void get_entry(Json::Value *passdb, std::string request)
  * post: delete the entry given by request
  * return: 0 on success, 1 on no such entry
  */
-
 int delete_entry(Json::Value *passdb, std::string request)
 {
 	if ((*passdb)["dbentry"].isMember(request))
 	{
-		(*passdb)["dbentry"].removeMember(request);
-		return 0;
+        (*passdb)["dbentry"].removeMember(request);
+        return 0;
 	}
 	else
 		return 1;
+}
+
+/* pre: takes in a Json::Value* passdb and a std::string request
+ * post: update the entry with new elements
+ * return: 0 on success, 1 on no such entry
+ */
+int update_entry(Json::Value *passdb, std::string request)
+{
+    std::string service;
+    std::string username;
+    std::string password;
+    std::string notes;
+    std::string entry;
+    std::string delimiter = "_";
+    std::string temp;
+    
+    //split string request and parse the service and username
+    temp = request;
+    service = temp.substr(0, temp.find(delimiter));
+    temp.erase(0, temp.find(delimiter) + delimiter.length());
+    username = temp;
+    
+    if ((*passdb)["dbentry"].isMember(request))
+    {
+        std::cout<<"Password: ";
+        hideterm();
+        std::getline(std::cin,password);
+        showterm();
+        std::cin.sync();
+        
+        std::cout<<"\nNotes:    ";
+        std::getline(std::cin,notes);
+        std::cout<<"\n";
+        std::cin.sync();
+        
+        entry = request;
+        
+        (*passdb)["dbentry"][entry]["service"] = service;
+        (*passdb)["dbentry"][entry]["username"] = username;
+        (*passdb)["dbentry"][entry]["password"] = password;
+        (*passdb)["dbentry"][entry]["notes"] = notes;
+        
+        return 0;
+    }
+    else
+        return 1;
 }
 
 /* pre: takes in int argc and char** argv command line arguments
@@ -249,15 +299,48 @@ int main(int argc, char **argv)
 	{
 		if (argc == 4)
 		{
-			int ret = delete_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
-			if (ret == 0)
-				std::cout << "Delete entry successfully" << std::endl;
-			else if (ret == 1)
-				panic("No such entry, please check your input", 2);
+			std::string confirm;
+            std::cout << "Are you sure to delete " + (std::string)argv[2] + "_" + (std::string)argv[3] + " entry? (yes/no):";
+			while (1)
+            {
+                getline(std::cin, confirm);
+                std::cin.sync();
+                if (!strcmp(confirm.c_str(), "yes"))
+                {
+                    int ret = delete_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
+                    if (ret == 0)
+					{
+                        std::cout << "Delete entry successfully" << std::endl;
+						break;
+					}
+					else if (ret == 1)
+                        panic("No such entry, please check your input", 2);
+                }
+                else if (!strcmp(confirm.c_str(), "no"))
+                    break;
+                else
+                    std::cout << "Please type 'yes' or 'no': ";
+            }
 		}
 		else
 			panic("usage: " + (std::string)argv[0] + " delete [<service> <username>]", 1);
 	}
+    else if (!strcmp(argv[1], "edit"))
+    {
+        if (argc == 4)
+        {
+            int ret = update_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
+            if (ret == 0) {
+                std::cout << "Entry is updated" << std::endl;
+            }
+            else if (ret == 1)
+            {
+                panic("No such entry, please check your input", 2);
+            }
+        }
+        else
+            panic("usage: " + (std::string)argv[0] + " edit [<service> <username>]", 1);
+    }
 
     if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
         panic("[-] Failed to write to user's password database file!", 3);
