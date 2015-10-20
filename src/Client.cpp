@@ -297,7 +297,8 @@ int main(int argc, char **argv)
 		if (argc == 4)
 		{
 			std::string confirm;
-            while (1)
+            std::cout << "Are you sure to delete " + (std::string)argv[2] + "_" + (std::string)argv[3] + " entry? (yes/no):";
+			while (1)
             {
                 getline(std::cin, confirm);
                 std::cin.sync();
@@ -305,8 +306,11 @@ int main(int argc, char **argv)
                 {
                     int ret = delete_entry(&passdb, (std::string)argv[2] + "_" + (std::string)argv[3]);
                     if (ret == 0)
+					{
                         std::cout << "Delete entry successfully" << std::endl;
-                    else if (ret == 1)
+						break;
+					}
+					else if (ret == 1)
                         panic("No such entry, please check your input", 2);
                 }
                 else if (!strcmp(confirm.c_str(), "no"))
