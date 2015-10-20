@@ -8,7 +8,7 @@ Our password manager for CS576.
 
 `add`:	Adds a new entry to the database.
 
-`get [<service> <username>]`:    Retrieves the entry for key: `<service>_<username>` from the database if they were provided, else returns a list of all entries.
+`get [<service> <username>]`:    Retrieves the entry for key: `<service>_<username>` from the database if they were provided, else returns a list of all entries. Reports error message if no such key exists.
 
 `edit [<service> <username>]`:	 Edits an existing entry for key: `<service>_<username>` with new values provided by user. Reports error message if no such key exists.
 
