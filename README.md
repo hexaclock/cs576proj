@@ -15,7 +15,7 @@ Our password manager for CS576.
 `delete [<service> <username>]`: Deletes an existing entry for key: `<service>_<username>`. Reports error message if no such key exists.
 
 ##Database file structure
-The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylocker.db`.
+The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylocker.db.enc`.
 
 ```
 {
