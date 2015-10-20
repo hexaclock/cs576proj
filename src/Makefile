@@ -1,3 +1,5 @@
+PROJECT  = cs576_project
+STAGE    = alpha
 CC       = clang++
 #SERVER   = server
 CLIENT   = client
@@ -24,11 +26,13 @@ $(CLIENT):
 
 clean:
 	-$(RM) *.o *~ \#*
-	-$(RM) ../doc/*.aux ../doc/*.log
 
 fclean: clean
 	-$(RM) $(SERVER) $(CLIENT)
 	-$(RM) ../doc/*.pdf
+
+docsclean:
+	-$(RM) ../doc/*.aux ../doc/*.log
 
 re: fclean all
 
@@ -38,5 +42,5 @@ docs:
 	$(PDFTEX) $(DOCSDIR)/design.tex
 
 # make a tar.gz with docs in ../../
-submit: fclean docs clean
-	tar -cvzf ../../cs576_project.tar.gz ../*
+submit: fclean docs docsclean
+	tar -cvzf ../../$(PROJECT)-$(STAGE).tar.gz ../*
