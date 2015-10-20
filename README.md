@@ -10,6 +10,9 @@ Our password manager for CS576.
 
 `get [<service> <username>]`:    Retrieves the entry for key: `<service>_<username>` from the database if they were provided, else returns a list of all entries.
 
+`edit [<service> <username>]`:	 Edits an existing entry for key: `<service>_<username>` with new values provided by user. Reports error message if no such key exists.
+
+`delete [<service> <username>]`: Deletes an existing entry for key: `<service>_<username>`. Reports error message if no such key exists.
 
 ##Database file structure
 The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylocker.db`.
