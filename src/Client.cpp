@@ -111,7 +111,7 @@ void get_entry(Json::Value *passdb, std::string request)
 
     if (!request.empty()) /* get where key=request */
     {
-        if (!(*passdb)["dbentry"].isMember(request))
+        if ((*passdb)["dbentry"].isMember(request))
             print_entry(passdb, request);
         else
             std::cout << "No entry found for: " << request << std::endl;
