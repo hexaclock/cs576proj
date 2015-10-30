@@ -12,6 +12,9 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <vector>
+#include <iterator>
+#include <sstream>
 #include <openssl/aes.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
