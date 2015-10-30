@@ -4,6 +4,19 @@
 
 #include <termios.h>
 
+std::string HELP_TEXT = "Commands can be any of the following:\
+\n\t'add':\t\t\t\tAdds a new entry to the database\
+\n\t'get [<service> <username>]':\tRetrieves the entry for \
+key: '<service>_<username>' from the database if they were provided,\
+else returns a list of all entries. Reports error message if no such key exists.\
+\n\t'edit <service> <username>':\tEdits an existing entry for key: \
+'<service>_<username>' with new values provided by user. Reports error message \
+if no such key exists.\
+\n\t'delete <service> <username>':\tDeletes an existing entry for key: \
+'<service>_<username>'. Reports error message if no such key exists.\
+\n\t'quit':\t\t\t\tExits the program.\
+\n\t'help':\t\t\t\tDisplays this list of commands.";
+
 /* pre: takes in an std::string msg and int code
  * post: prints msg to stdout and exits with error code code
  */
@@ -361,6 +374,8 @@ int main(int argc, char **argv)
         }
         else if (args[0] == "quit")
             break;
+        else if (args[0] == "help")
+            std::cout<<HELP_TEXT<<std::endl;
         else
             std::cout<<"Invalid command"<<std::endl;
 
