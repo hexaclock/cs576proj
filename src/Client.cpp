@@ -4,6 +4,19 @@
 
 #include <termios.h>
 
+std::string HELP_TEXT = "Commands can be any of the following:\
+\n\t'add':\t\t\t\tAdds a new entry to the database\
+\n\t'get [<service> <username>]':\tRetrieves the entry for \
+key: '<service>_<username>' from the database if they were provided,\
+else returns a list of all entries. Reports error message if no such key exists.\
+\n\t'edit <service> <username>':\tEdits an existing entry for key: \
+'<service>_<username>' with new values provided by user. Reports error message \
+if no such key exists.\
+\n\t'delete <service> <username>':\tDeletes an existing entry for key: \
+'<service>_<username>'. Reports error message if no such key exists.\
+\n\t'quit':\t\t\t\tExits the program.\
+\n\t'help':\t\t\t\tDisplays this list of commands.";
+
 /* pre: takes in an std::string msg and int code
  * post: prints msg to stdout and exits with error code code
  */
@@ -289,87 +302,88 @@ int main(int argc, char **argv)
     int argcnt;
     while(1)
     {
-	std::cout << "KeyLocker> ";
-	std::getline(std::cin,cmdline);
-	std::stringstream iss(cmdline);
-	copy(std::istream_iterator<std::string>(iss),
-	     std::istream_iterator<std::string>(),
-	     std::back_inserter(args));
-	argcnt = args.size();
-	
-	if (args[0] == "add")
-	    add_entry(&passdb);
-	else if (args[0] == "get") /* else if 'get' is the user's command */
-	{
-	    if (argcnt == 3) /* prg get service username */
-		get_entry(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
-	    else if (argcnt == 1) /* prg get */
-		get_entry(&passdb, "");
-	    else
-		std::cout<<"usage: get [<service> <username>]"<<std::endl;
-	}
-	else if (args[0] == "delete")
-	{
-	    if (argcnt == 3)
-	    {
-		std::string confirm;
-		std::cout << "Are you sure wish to delete " + 
-		    (std::string)args[1] + "_" + 
-		    (std::string)args[2] + " entry? (yes/no): ";
-		while (1)
-		{
-		    getline(std::cin, confirm);
-		    std::cin.sync();
-		    if (!strcmp(confirm.c_str(), "yes"))
-		    {
-			int ret = delete_entry(&passdb, (std::string)args[1] + 
-					       "_" + (std::string)args[2]);
-			if (ret == 0)
-			{
-			    std::cout << "Entry deleted" << std::endl;
-			    break;
-			}
-			else if (ret == 1)
-			    std::cout << "No such entry, please check your input" << std::endl;
-		    }
-		    else if (!strcmp(confirm.c_str(), "no"))
-			break;
-		    else
-			std::cout << "Please type 'yes' or 'no': ";
-		}
-	    }
-	    else
-		std::cout<<"usage: delete [<service> <username>]"<<std::endl;
-	}
-	else if (args[0] == "edit")
-	{
-	    if (argcnt == 3)
-	    {
-		int ret = update_entry(&passdb, (std::string)args[1] + "_" + 
-				       (std::string)args[2]);
-		if (ret == 0)
-		{
-		    std::cout << "Entry updated" << std::endl;
-		}
-		else if (ret == 1)
-		{
-		    std::cout<<"No such entry, please check your input"<<std::endl;
-		}
-	    }
-	    else
-		std::cout<<"usage: edit [<service> <username>]"<<std::endl;
-	}
-	else if (args[0] == "quit")
-	    break;
-	
-	else
-	    std::cout<<"Invalid command"<<std::endl;
+        std::cout << "KeyLocker> ";
+        std::getline(std::cin,cmdline);
+        std::stringstream iss(cmdline);
+        copy(std::istream_iterator<std::string>(iss),
+                std::istream_iterator<std::string>(),
+                std::back_inserter(args));
+        argcnt = args.size();
+
+        if (args[0] == "add")
+            add_entry(&passdb);
+        else if (args[0] == "get") /* else if 'get' is the user's command */
+        {
+            if (argcnt == 3) /* prg get service username */
+                get_entry(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
+            else if (argcnt == 1) /* prg get */
+                get_entry(&passdb, "");
+            else
+                std::cout<<"usage: get [<service> <username>]"<<std::endl;
+        }
+        else if (args[0] == "delete")
+        {
+            if (argcnt == 3)
+            {
+                std::string confirm;
+                std::cout << "Are you sure wish to delete " +
+                    (std::string)args[1] + "_" +
+                    (std::string)args[2] + " entry? (yes/no): ";
+                while (1)
+                {
+                    getline(std::cin, confirm);
+                    std::cin.sync();
+                    if (!strcmp(confirm.c_str(), "yes"))
+                    {
+                        int ret = delete_entry(&passdb, (std::string)args[1] +
+                                "_" + (std::string)args[2]);
+                        if (ret == 0)
+                        {
+                            std::cout << "Entry deleted" << std::endl;
+                            break;
+                        }
+                        else if (ret == 1)
+                            std::cout << "No such entry, please check your input" << std::endl;
+                    }
+                    else if (!strcmp(confirm.c_str(), "no"))
+                        break;
+                    else
+                        std::cout << "Please type 'yes' or 'no': ";
+                }
+            }
+            else
+                std::cout<<"usage: delete [<service> <username>]"<<std::endl;
+        }
+        else if (args[0] == "edit")
+        {
+            if (argcnt == 3)
+            {
+                int ret = update_entry(&passdb, (std::string)args[1] + "_" +
+                        (std::string)args[2]);
+                if (ret == 0)
+                {
+                    std::cout << "Entry updated" << std::endl;
+                }
+                else if (ret == 1)
+                {
+                    std::cout<<"No such entry, please check your input"<<std::endl;
+                }
+            }
+            else
+                std::cout<<"usage: edit [<service> <username>]"<<std::endl;
+        }
+        else if (args[0] == "quit")
+            break;
+        else if (args[0] == "help")
+            std::cout<<HELP_TEXT<<std::endl;
+        else
+            std::cout<<"Invalid command"<<std::endl;
 
 
-	cmdline = "";
-	args.clear();
-	argcnt = 0;
-	std::cout<<std::endl;
+        cmdline = "";
+        args.clear();
+        argcnt = 0;
+        std::cout<<std::endl;
     }
 
     if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
