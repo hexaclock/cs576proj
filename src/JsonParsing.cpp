@@ -24,12 +24,18 @@ bool JsonParsing::readJson(Json::Value* root, std::string dbName, std::string ke
     std::string ctxtjson( (std::istreambuf_iterator<char>(passdb_file)),
                           std::istreambuf_iterator<char>() );
     //decrypt into ptxtjson//
-    ptxtjson = KLCrypto::dbDecrypt2(ctxtjson,key);
+    if ( (ptxtjson = KLCrypto::dbDecrypt(ctxtjson,key)) == "" )
+    {
+        passdb_file.close();
+        exit(-3);
+        return false;
+    }
     
     if (!reader.parse(ptxtjson, *root, false))
       {
         std::cout  << reader.getFormattedErrorMessages() << std::endl;
         passdb_file.close();
+        exit(-3);
         return false;
       }
     
@@ -53,7 +59,10 @@ bool JsonParsing::writeJson(Json::Value* root, std::string dbName, std::string k
     std::ofstream outFile;
 
     std::string ptxtjson = writer.write(*root);
-    std::string ctxtjson = KLCrypto::dbEncrypt2(ptxtjson,key);
+    std::string ctxtjson = KLCrypto::dbEncrypt(ptxtjson,key);
+
+    if (ctxtjson == "")
+        return false;
 
     outFile.open(dbName);
     if (!outFile.is_open())

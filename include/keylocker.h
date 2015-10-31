@@ -86,11 +86,9 @@ public:
 class KLCrypto
 {
 public:
-    static bool dbEncrypt(std::string filepath, std::string pass);
-    static bool dbDecrypt(std::string filepath, std::string pass);
     static byte* getRandBytes(int nbytes);
-    static std::string dbEncrypt2(std::string ptxt, std::string pass);
-    static std::string dbDecrypt2(std::string ctxt, std::string pass);
+    static std::string dbEncrypt(std::string ptxt, std::string pass);
+    static std::string dbDecrypt(std::string ctxt, std::string pass);
     
 };
 
