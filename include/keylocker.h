@@ -15,6 +15,7 @@
 #include <vector>
 #include <iterator>
 #include <sstream>
+#include <wolfssl/wolfcrypt/aes.h>
 #include <openssl/aes.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>

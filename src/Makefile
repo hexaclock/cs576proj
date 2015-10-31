@@ -9,6 +9,8 @@ OBJ1     = $(SRC1:.cpp=.o)
 OBJ2     = $(SRC2:.cpp=.o)
 OPENSSL  = /usr/include/openssl
 IPATH    = ../include
+LDLIBS   += -l:libwolfssl.so.1.0.0
+LDFLAGS  += -L../lib
 CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -g -O2 -Wall -Wextra -pedantic -std=c++11
 RM       = rm -f
 
@@ -19,10 +21,10 @@ PDFTEX   = pdflatex -shell-escape -interaction=nonstopmode -file-line-error -out
 all: $(SERVER) $(CLIENT)
 
 $(SERVER):
-	$(CC) $(CXXFLAGS) $(SRC1) -o $(SERVER)
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $(SRC1) -o $(SERVER) $(LDLIBS)
 
 $(CLIENT):
-	$(CC) $(CXXFLAGS) $(SRC2) -o $(CLIENT)
+	$(CC) $(CXXFLAGS) $(LDFLAGS) $(SRC2) -o $(CLIENT) $(LDLIBS)
 
 clean:
 	-$(RM) *.o *~ \#*
