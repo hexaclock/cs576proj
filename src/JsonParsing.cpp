@@ -60,6 +60,10 @@ bool JsonParsing::writeJson(Json::Value* root, std::string dbName, std::string k
     outFile << writer.write(*root);
     outFile.close();
     KLCrypto::dbEncrypt(dbName,key);
+    std::string ctxtret = KLCrypto::dbEncrypt2("this is a a random string <><><><>",
+                                            "bogus");
+    //std::cout<<ctxtret<<std::endl;
+    std::string ptxtret = KLCrypto::dbDecrypt2(ctxtret,"bogus");
 
     return true;
 }
