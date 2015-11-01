@@ -244,7 +244,6 @@ int main(int argc, char **argv)
 
     dbname = username + "_keylocker" + ".db";
     kldir  = homepath + "/" + ".keylocker";
-    std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
     if ( (result = mkdir(kldir.c_str(),0700)) == -1 )
     {
         if (errno != EEXIST)
@@ -268,6 +267,7 @@ int main(int argc, char **argv)
     }
     else
     {
+        std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
         std::cout<<"Database password: ";
         hideterm();
         std::getline(std::cin,dbpass);
@@ -296,8 +296,10 @@ int main(int argc, char **argv)
 	     std::istream_iterator<std::string>(),
 	     std::back_inserter(args));
 	argcnt = args.size();
-	
-	if (args[0] == "add")
+        
+        if (argcnt == 0)
+            continue;
+	else if (args[0] == "add")
 	    add_entry(&passdb);
 	else if (args[0] == "get") /* else if 'get' is the user's command */
 	{

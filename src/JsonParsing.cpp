@@ -13,28 +13,34 @@ bool JsonParsing::readJson(Json::Value* root, std::string dbName, std::string ke
 {
     Json::Reader reader;
     std::ifstream passdb_file;
+    std::string ptxtjson;
     
-    if (!KLCrypto::dbDecrypt(dbName,key))
-      {
-	std::cout<<"Database decrypt failed.. wrong password?"<<std::endl;
-	passdb_file.close();
-	exit(-3);
-      }
+    passdb_file.open(dbName);    
     
-    passdb_file.open(dbName, std::ifstream::binary);
     if (!passdb_file.is_open())
       return false;
 
-    if (!reader.parse(passdb_file, *root, false))
+    //read file into std::string ctxtjson//
+    std::string ctxtjson( (std::istreambuf_iterator<char>(passdb_file)),
+                          std::istreambuf_iterator<char>() );
+    //decrypt into ptxtjson//
+    if ( (ptxtjson = KLCrypto::dbDecrypt(ctxtjson,key)) == "" )
+    {
+        passdb_file.close();
+        exit(-3);
+        return false;
+    }
+    
+    if (!reader.parse(ptxtjson, *root, false))
       {
         std::cout  << reader.getFormattedErrorMessages() << std::endl;
         passdb_file.close();
+        exit(-3);
         return false;
       }
     
     passdb_file.close();
-    std::remove(dbName.c_str());
-
+    
     return true;
 }
 
@@ -52,14 +58,18 @@ bool JsonParsing::writeJson(Json::Value* root, std::string dbName, std::string k
 #endif
     std::ofstream outFile;
 
-    outFile.open(dbName, std::ofstream::binary);
+    std::string ptxtjson = writer.write(*root);
+    std::string ctxtjson = KLCrypto::dbEncrypt(ptxtjson,key);
+
+    if (ctxtjson == "")
+        return false;
+
+    outFile.open(dbName);
     if (!outFile.is_open())
         return false;
 
-    //maybe we need to error check this later?
-    outFile << writer.write(*root);
+    outFile << ctxtjson;
     outFile.close();
-    KLCrypto::dbEncrypt(dbName,key);
 
     return true;
 }

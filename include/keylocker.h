@@ -15,6 +15,15 @@
 #include <vector>
 #include <iterator>
 #include <sstream>
+/*wolfSSL*/
+#include <wolfssl/options.h>
+#include <wolfssl/wolfcrypt/aes.h>
+#include <wolfssl/wolfcrypt/sha256.h>
+#include <wolfssl/wolfcrypt/random.h>
+#include <wolfssl/wolfcrypt/pwdbased.h>
+#include <wolfssl/wolfcrypt/coding.h>
+#include <wolfssl/wolfcrypt/error-crypt.h>
+/*
 #include <openssl/aes.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -24,8 +33,10 @@
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
+*/
 #include <linux/limits.h>
 #include "json/json.h"
+#include "base64.h"
 
 /* class for creating/editing clients
  */
@@ -64,9 +75,9 @@ class Server
  */
 class JsonParsing
 {
-    public:
-  static bool readJson(Json::Value* root, std::string dbName, std::string key);
-  static bool writeJson(Json::Value* root, std::string dbName, std::string key);
+public:
+    static bool readJson(Json::Value* root, std::string dbName, std::string key);
+    static bool writeJson(Json::Value* root, std::string dbName, std::string key);
 };
 
 /*
@@ -74,9 +85,10 @@ class JsonParsing
  */
 class KLCrypto
 {
-  public:
-    static bool dbEncrypt(std::string filepath, std::string pass);
-    static bool dbDecrypt(std::string filepath, std::string pass);
+public:
+    static byte* getRandBytes(int nbytes);
+    static std::string dbEncrypt(std::string ptxt, std::string pass);
+    static std::string dbDecrypt(std::string ctxt, std::string pass);
     
 };
 
