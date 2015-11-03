@@ -48,6 +48,7 @@ class Client
         std::string newEntry();
         bool editEntry(std::string euuid);
         bool deleteEntry(std::string euuid);
+        bool checkpass(std::string curpass);
     private:
 
 };
