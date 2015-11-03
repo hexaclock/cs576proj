@@ -215,6 +215,23 @@ int update_entry(Json::Value *passdb, std::string request)
         return 1;
 }
 
+bool checkpass(std::string curpass)
+{
+    std::string testpass;
+    //std::string newpass;
+    std::cout<<"Current password: ";
+    hideterm();
+    std::getline(std::cin,testpass);
+    showterm();
+
+    if (testpass == curpass)
+    {
+        return true;
+        //return newpass;
+    }
+    return false;
+}
+
 /* pre: takes in int argc and char** argv command line arguments
  * post: runs the client side keylocker program
  * returns: 0 on success, something else on failure
@@ -374,6 +391,39 @@ int main(int argc, char **argv)
 	    else
 		std::cout<<"usage: edit [<service> <username>]"<<std::endl;
 	}
+        else if (args[0] == "chpass")
+        {
+            std::string newpass;
+            std::string confirmnewpass;
+
+            if (checkpass(dbpass))
+            {
+                std::cout<<std::endl<<"New password: ";
+                hideterm();
+                std::getline(std::cin,newpass);
+                showterm();
+                std::cout<<std::endl<<"Retype new password: ";
+                hideterm();
+                std::getline(std::cin,confirmnewpass);
+                showterm();
+                if (newpass == confirmnewpass)
+                {
+                    dbpass = newpass;
+                    if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
+                    {
+                        panic("[-] Failed to update user's password", 3);
+                    }
+                    else
+                        std::cout<<std::endl<<"Password updated successfully"<<std::endl;
+                }
+                else
+                {
+                    std::cout<<std::endl<<"Typo detected! Password not changed"<<std::endl;
+                }
+            }
+            else
+                std::cout<<std::endl<<"Incorrect password"<<std::endl;
+        }
 	else if (args[0] == "quit")
 	    break;
         else if (args[0] == "help")
