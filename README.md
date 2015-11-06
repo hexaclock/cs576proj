@@ -6,9 +6,9 @@ Our password manager for CS576.
 
 **Commands:**
 
-`add [<length>]`: 	Adds a new entry to the database with a random password of specified length (or prompts user for password if length was 0 or not included).
+`add [<length>]`: 	Adds a new entry to the database with a random password of specified `length` (or prompts user for password if `length` was 0 or not included).
 
-`gen <length>`:   Generates a random password of specified length.
+`gen <length>`:   Generates a random password of length `length`.
 
 `get [<service> <username>]`:    Retrieves the entry for key: `<service>_<username>` from the database if they were provided, else returns a list of all entries. Reports error message if no such key exists.
 
