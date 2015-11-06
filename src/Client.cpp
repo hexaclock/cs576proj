@@ -33,7 +33,7 @@ void panic(std::string msg, int code)
  */
 std::string gen(int len)
 {
-	return KLCrypto::genpwd(len);
+    return KLCrypto::genpwd(len);
 }
 
 /* pre: none
@@ -80,22 +80,22 @@ void add_entry(Json::Value *passdb, int randlen)
     std::cin.sync();
 
     std::cout<<"Notes:    ";
- 	  std::getline(std::cin,notes);
- 	  std::cin.sync();
+    std::getline(std::cin,notes);
+    std::cin.sync();
 
-		if (randlen > 0)
-		{
-			password = gen(randlen);
-			std::cout<<"Password :"<<std::endl<<password;
-		}
-		else
-		{
-	    std::cout<<"Password: ";
-  	  hideterm();
-	    std::getline(std::cin,password);
-  	  showterm();
-	    std::cin.sync();
-		}
+    if (randlen > 0)
+    {
+        password = gen(randlen);
+        std::cout<<"Password :"<<std::endl<<password;
+    }
+    else
+    {
+        std::cout<<"Password: ";
+        hideterm();
+        std::getline(std::cin,password);
+        showterm();
+        std::cin.sync();
+    }
 
     entry = service + "_" + username;
     // If an entry is exist, user cannot overwrite it. This will prevent some fault operation.
@@ -336,83 +336,83 @@ int main(int argc, char **argv)
     int argcnt;
     while(1)
     {
-	std::cout << "KeyLocker> ";
-	std::getline(std::cin,cmdline);
-	std::stringstream iss(cmdline);
-	copy(std::istream_iterator<std::string>(iss),
-	     std::istream_iterator<std::string>(),
-	     std::back_inserter(args));
-	argcnt = args.size();
-        
+        std::cout << "KeyLocker> ";
+        std::getline(std::cin,cmdline);
+        std::stringstream iss(cmdline);
+        copy(std::istream_iterator<std::string>(iss),
+                std::istream_iterator<std::string>(),
+                std::back_inserter(args));
+        argcnt = args.size();
+
         if (argcnt == 0)
             continue;
-	else if (args[0] == "add")
-	{
-			if (argcnt > 1 && atoi(args[1].c_str()))
-		    add_entry(&passdb, atoi(args[1].c_str()));
-			else
-				add_entry(&passdb, 0);
-	}
-	else if (args[0] == "get") /* else if 'get' is the user's command */
-	{
-	    if (argcnt == 3) /* prg get service username */
-		get_entry(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
-	    else if (argcnt == 1) /* prg get */
-		get_entry(&passdb, "");
-	    else
-		std::cout<<"usage: get [<service> <username>]"<<std::endl;
-	}
-	else if (args[0] == "delete")
-	{
-	    if (argcnt == 3)
-	    {
-		std::string confirm;
-		std::cout << "Are you sure wish to delete " + 
-		    (std::string)args[1] + "_" + 
-		    (std::string)args[2] + " entry? (yes/no): ";
-		while (1)
-		{
-		    getline(std::cin, confirm);
-		    std::cin.sync();
-		    if (!strcmp(confirm.c_str(), "yes"))
-		    {
-			int ret = delete_entry(&passdb, (std::string)args[1] + 
-					       "_" + (std::string)args[2]);
-			if (ret == 0)
-			{
-			    std::cout << "Entry deleted" << std::endl;
-			    break;
-			}
-			else if (ret == 1)
-			    std::cout << "No such entry, please check your input" << std::endl;
-		    }
-		    else if (!strcmp(confirm.c_str(), "no"))
-			break;
-		    else
-			std::cout << "Please type 'yes' or 'no': ";
-		}
-	    }
-	    else
-		std::cout<<"usage: delete [<service> <username>]"<<std::endl;
-	}
-	else if (args[0] == "edit")
-	{
-	    if (argcnt == 3)
-	    {
-		int ret = update_entry(&passdb, (std::string)args[1] + "_" + 
-				       (std::string)args[2]);
-		if (ret == 0)
-		{
-		    std::cout << "Entry updated" << std::endl;
-		}
-		else if (ret == 1)
-		{
-		    std::cout<<"No such entry, please check your input"<<std::endl;
-		}
-	    }
-	    else
-		std::cout<<"usage: edit [<service> <username>]"<<std::endl;
-	}
+        else if (args[0] == "add")
+        {
+            if (argcnt > 1 && atoi(args[1].c_str()))
+                add_entry(&passdb, atoi(args[1].c_str()));
+            else
+                add_entry(&passdb, 0);
+        }
+        else if (args[0] == "get") /* else if 'get' is the user's command */
+        {
+            if (argcnt == 3) /* prg get service username */
+                get_entry(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
+            else if (argcnt == 1) /* prg get */
+                get_entry(&passdb, "");
+            else
+                std::cout<<"usage: get [<service> <username>]"<<std::endl;
+        }
+        else if (args[0] == "delete")
+        {
+            if (argcnt == 3)
+            {
+                std::string confirm;
+                std::cout << "Are you sure wish to delete " +
+                    (std::string)args[1] + "_" +
+                    (std::string)args[2] + " entry? (yes/no): ";
+                while (1)
+                {
+                    getline(std::cin, confirm);
+                    std::cin.sync();
+                    if (!strcmp(confirm.c_str(), "yes"))
+                    {
+                        int ret = delete_entry(&passdb, (std::string)args[1] +
+                                "_" + (std::string)args[2]);
+                        if (ret == 0)
+                        {
+                            std::cout << "Entry deleted" << std::endl;
+                            break;
+                        }
+                        else if (ret == 1)
+                            std::cout << "No such entry, please check your input" << std::endl;
+                    }
+                    else if (!strcmp(confirm.c_str(), "no"))
+                        break;
+                    else
+                        std::cout << "Please type 'yes' or 'no': ";
+                }
+            }
+            else
+                std::cout<<"usage: delete [<service> <username>]"<<std::endl;
+        }
+        else if (args[0] == "edit")
+        {
+            if (argcnt == 3)
+            {
+                int ret = update_entry(&passdb, (std::string)args[1] + "_" +
+                        (std::string)args[2]);
+                if (ret == 0)
+                {
+                    std::cout << "Entry updated" << std::endl;
+                }
+                else if (ret == 1)
+                {
+                    std::cout<<"No such entry, please check your input"<<std::endl;
+                }
+            }
+            else
+                std::cout<<"usage: edit [<service> <username>]"<<std::endl;
+        }
         else if (args[0] == "chpass")
         {
             std::string newpass;
@@ -446,26 +446,26 @@ int main(int argc, char **argv)
             else
                 std::cout<<std::endl<<"Incorrect password"<<std::endl;
         }
-	else if (args[0] == "gen")
-	{
-		if (argcnt == 2)
-			if (atoi(args[1].c_str()) > 0)
-				std::cout<<gen(atoi(args[1].c_str()))<<std::endl;
-		else
-	    std::cout<<"usage: gen <password length>"<<std::endl;
-	}
-	else if (args[0] == "quit")
-	    break;
+        else if (args[0] == "gen")
+        {
+            if (argcnt == 2)
+                if (atoi(args[1].c_str()) > 0)
+                    std::cout<<gen(atoi(args[1].c_str()))<<std::endl;
+                else
+                    std::cout<<"usage: gen <password length>"<<std::endl;
+        }
+        else if (args[0] == "quit")
+            break;
         else if (args[0] == "help")
-            std::cout<<HELP_TEXT<<std::endl;	
-	else
-	    std::cout<<"Invalid command"<<std::endl;
+            std::cout<<HELP_TEXT<<std::endl;
+        else
+            std::cout<<"Invalid command"<<std::endl;
 
 
-	cmdline = "";
-	args.clear();
-	argcnt = 0;
-	std::cout<<std::endl;
+        cmdline = "";
+        args.clear();
+        argcnt = 0;
+        std::cout<<std::endl;
     }
 
     if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
