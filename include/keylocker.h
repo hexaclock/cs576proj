@@ -90,7 +90,7 @@ public:
     static byte* getRandBytes(int nbytes);
     static std::string dbEncrypt(std::string ptxt, std::string pass);
     static std::string dbDecrypt(std::string ctxt, std::string pass);
-    
+    static std::string genpwd(int len);
 };
 
 #endif
