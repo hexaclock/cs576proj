@@ -3,19 +3,19 @@ STAGE    = beta
 CC       = clang++
 #SERVER   = server
 CLIENT   = client
-SRC1     = Server.cpp jsoncpp.cpp JsonParsing.cpp Crypto.cpp base64.cpp
-SRC2     = Client.cpp jsoncpp.cpp JsonParsing.cpp Crypto.cpp base64.cpp
+SRC1     = Server.cpp Crypto.cpp jsoncpp.cpp JsonParsing.cpp base64.cpp
+SRC2     = Client.cpp Crypto.cpp JsonParsing.cpp ../shared/jsoncpp.cpp ../shared/base64.cpp
 OBJ1     = $(SRC1:.cpp=.o)
 OBJ2     = $(SRC2:.cpp=.o)
 OPENSSL  = /usr/include/openssl
-IPATH    = ../include
+IPATH    = ../../include
 LDLIBS   += -l:libwolfssl.so.1.0.0
-LDFLAGS  += -L../lib -Wl,-rpath -Wl,../lib
+LDFLAGS  += -L../../lib -Wl,-rpath -Wl,../../lib
 CXXFLAGS += -I$(IPATH) -I$(OPENSSL) -ggdb -Wall -Wextra -pedantic -std=c++11
 RM       = rm -f
 
 # Latex things for docs
-DOCSDIR  = ../doc
+DOCSDIR  = ../../doc
 PDFTEX   = pdflatex -shell-escape -interaction=nonstopmode -file-line-error -output-directory $(DOCSDIR)
 
 all: $(SERVER) $(CLIENT)
@@ -31,10 +31,10 @@ clean:
 
 fclean: clean
 	-$(RM) $(SERVER) $(CLIENT)
-	-$(RM) ../doc/*.pdf
+	-$(RM) ../../doc/*.pdf
 
 docsclean:
-	-$(RM) ../doc/*.aux ../doc/*.log
+	-$(RM) ../../doc/*.aux ../../doc/*.log
 
 re: fclean all
 
