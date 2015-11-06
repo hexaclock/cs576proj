@@ -1,5 +1,5 @@
 PROJECT  = cs576_project
-STAGE    = alpha
+STAGE    = beta
 CC       = clang++
 #SERVER   = server
 CLIENT   = client

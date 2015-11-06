@@ -36,11 +36,11 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 \item \textbf{(B) }The system should have an administrative user account that only has access to functionality- necessary to maintain the database (adding and removing users, etc.). The administrative user shall have no access to the private data of others.
 \item \textbf{(B) }Audit logging: Each time a password is viewed, edited, or deleted the system will record the time and a log of the operation.
 \item \textbf{(B) }Lock an account once a user-configurable number of authentication failures is reached within a user-configurable time period.
-\item \textbf{(B) }Generate a new keypair (client-side) for new users if they do not have one already.
+\item \textbf{(B) }Prompt for the creation of a new password (client-side) for new users if they do not have one already.
 \item \textbf{(C) }A GUI in order to make the system easier to use. The system will be CLI-driven otherwise.
 \item \textbf{(C) }Multi-factor authentication. Should a user's private key be compromised, it will still be difficult for an attacker to be able to download a copy of the victim's data.
 \item \textbf{(C) }In the event a user wishes to cease using the system, it would be nice to have a feature to delete their account and all associated data from the server (including any groups that they may own).
-\item \textbf{(C) }Allow user to change/create a new public/private keypair.
+\item \textbf{(C) }Allow user to change their master password.
 \end{itemize}
 \smallskip
 \noindent(2) Modification
@@ -95,12 +95,13 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 \end{itemize}
 \noindent2. Beta System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
+\item Add syncing from client to a server.
 \item Begin adding shared groups and TLS tunneling at this stage.
-\item Add support for ACLs.
-\item Add support for keypair-based encryption.
+\item Add password generation.
 \end{itemize}
 \noindent3. Final System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
+\item Add support for ACLs.
 \item Shared groups and TLS tunneling will be fully implemented.
 \item Possibly add the “nice to have” features depending on time constraints.
 \end{itemize}
@@ -116,6 +117,6 @@ In order to ensure our program functions as intended, we propose a list of steps
 \item Ensure shared group database merging, if needed, works reliably (have multiple test users edit the database and save their changes).
 \item Evaluate the user interface (CLI, and, if implemented, the GUI) for ease-of-use and sensible design.
 \item Try to edit/view user’s private data  entries using the database administrator account. These operations are considered invalid/impossible, and should not happen under any circumstance.
-\item When a new user registers with the system, the client should require that a keypair be generated (if the user does not already have one). The private key for this keypair should be encrypted using a password/symmetric key that only the user knows.
+\item When a new user registers with the system, the client should require that a master password be created (if the user does not already have one).
 \end{itemize}
 \end{document}
