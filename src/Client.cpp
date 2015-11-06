@@ -5,7 +5,9 @@
 #include <termios.h>
 
 std::string HELP_TEXT = "Commands can be any of the following:\
-\n\t'add':\t\t\t\tAdds a new entry to the database\
+\n\t'add [<length>]':\t\tAdds a new entry to the database with a random password \
+of specified length (or prompts user for password if length was 0 or not included).\
+\n\t'gen <length>':\t\t\tGenerates a random password of specified length.\
 \n\t'get [<service> <username>]':\tRetrieves the entry for \
 key: '<service>_<username>' from the database if they were provided,\
 else returns a list of all entries. Reports error message if no such key exists.\
@@ -24,6 +26,14 @@ void panic(std::string msg, int code)
 {
     std::cout << msg << std::endl;
     exit(code);
+}
+
+/* pre: takes in an integer len
+ * post: returns a random string of len characters, encoded in b64
+ */
+std::string gen(int len)
+{
+	return KLCrypto::genpwd(len);
 }
 
 /* pre: none
@@ -52,7 +62,7 @@ void showterm()
  * post: reads in user input and creates a new keylocker database entry with the
  *      provided input in passdb
  */
-void add_entry(Json::Value *passdb)
+void add_entry(Json::Value *passdb, int randlen)
 {
 
     std::string service;
@@ -69,22 +79,29 @@ void add_entry(Json::Value *passdb)
     std::getline(std::cin,username);
     std::cin.sync();
 
-    std::cout<<"Password: ";
-    hideterm();
-    std::getline(std::cin,password);
-    showterm();
-    std::cin.sync();
+    std::cout<<"Notes:    ";
+ 	  std::getline(std::cin,notes);
+ 	  std::cin.sync();
 
-    std::cout<<"\nNotes:    ";
-    std::getline(std::cin,notes);
-    std::cout<<"\n";
-    std::cin.sync();
+		if (randlen > 0)
+		{
+			password = gen(randlen);
+			std::cout<<"Password :"<<std::endl<<password;
+		}
+		else
+		{
+	    std::cout<<"Password: ";
+  	  hideterm();
+	    std::getline(std::cin,password);
+  	  showterm();
+	    std::cin.sync();
+		}
 
     entry = service + "_" + username;
     // If an entry is exist, user cannot overwrite it. This will prevent some fault operation.
     if ((*passdb)["dbentry"].isMember(entry))
     {
-        panic("Entry is already exist", 4);
+        panic("Entry already exists", 4);
     }
 
     (*passdb)["dbentry"][entry]["service"] = service;
@@ -330,7 +347,12 @@ int main(int argc, char **argv)
         if (argcnt == 0)
             continue;
 	else if (args[0] == "add")
-	    add_entry(&passdb);
+	{
+			if (argcnt > 1 && atoi(args[1].c_str()))
+		    add_entry(&passdb, atoi(args[1].c_str()));
+			else
+				add_entry(&passdb, 0);
+	}
 	else if (args[0] == "get") /* else if 'get' is the user's command */
 	{
 	    if (argcnt == 3) /* prg get service username */
@@ -424,6 +446,14 @@ int main(int argc, char **argv)
             else
                 std::cout<<std::endl<<"Incorrect password"<<std::endl;
         }
+	else if (args[0] == "gen")
+	{
+		if (argcnt == 2)
+			if (atoi(args[1].c_str()) > 0)
+				std::cout<<gen(atoi(args[1].c_str()))<<std::endl;
+		else
+	    std::cout<<"usage: gen <password length>"<<std::endl;
+	}
 	else if (args[0] == "quit")
 	    break;
         else if (args[0] == "help")

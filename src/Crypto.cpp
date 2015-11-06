@@ -153,6 +153,29 @@ std::string KLCrypto::dbDecrypt(std::string ctxt, std::string pass)
     return ret;    
 }
 
+std::string KLCrypto::genpwd(int pwdlen)
+{
+	if ( pwdlen <= 0 || pwdlen > 1024 )
+	{
+		std::cout << "Invalid password length!" << std::endl;
+		exit(123);
+	}
+
+	int bytesin;
+
+	if (pwdlen % 4) 										// if passwordlength is not a multiple of 4
+		bytesin = ((pwdlen * 3) / 4) + 1; // 3/4 the bytes needed as output are needed as input (+1)
+	else
+		bytesin = (pwdlen / 4) * 3; 			// 3/4 of the bytes needed as output are needed as input
+
+	byte *rand = KLCrypto::getRandBytes(bytesin);
+	std::string ret = base64_encode(rand, bytesin);
+	memset(rand,0,bytesin);
+	ret.resize(pwdlen);
+
+	return ret;
+}
+
 /*bool KLCrypto::dbEncrypt(std::string filepath, std::string pass)
 {
   int retcode;
