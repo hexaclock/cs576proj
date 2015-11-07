@@ -3,7 +3,7 @@ STAGE 	= beta
 DOC 	= doc/Makefile
 SRC 	= src/Makefile
 
-#call src/Makefile and docs/Makefile
+#call all from src/Makefile and docs/Makefile
 all:
 
 #call clean from src/Makefile and doc/Makefile
@@ -21,11 +21,23 @@ src_all:
 #call clean from src/Makefile
 src_clean:
 
+#call fclean from src/Makefile
+src_fclean:
+
+#call re from src/Makefile
+src_re:
+
 #call all from doc/Makefile
 doc_all:
 
 #call clean from doc/Makefile
 doc_clean:
+
+#call fclean from doc/Makefile
+doc_fclean:
+
+#call re from doc/Makefile
+doc_re:
 
 submit: fclean doc_all doc_clean
 	tar -cvzf $(PROJECT)-$(STAGE).tar.gz ./*
