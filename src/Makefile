@@ -1,38 +1,38 @@
-CLIENT = Client/Makefile
-SERVER = Server/Makefile
+CLIENT = client/Makefile
+SERVER = server/Makefile
 
-#call all from Client/Makefile and Server/Makefile
+#call all from client/Makefile and server/Makefile
 all:
 
-#call clean from Client/Makefile and Server/Makefile
+#call clean from client/Makefile and server/Makefile
 clean:
 
-#call fclean from Client/Makefile and Server/Makefile
+#call fclean from client/Makefile and server/Makefile
 fclean:
 
-#call re from Client/Makefile and Server/Makefile
+#call re from client/Makefile and server/Makefile
 re:
 
-#call all from Client/Makefile
+#call all from client/Makefile
 client_all:
 
-#call clean from Client/Makefile
+#call clean from client/Makefile
 client_clean:
 
-#call fclean from Client/Makefile
+#call fclean from client/Makefile
 client_fclean:
 
-#call re from Client/Makefile
+#call re from client/Makefile
 client_re:
 
-#call all from Server/Makefile
+#call all from server/Makefile
 server_all:
 
-#call clean from Server/Makefile
+#call clean from server/Makefile
 server_clean:
 
-#call fclean from Server/Makefile
+#call fclean from server/Makefile
 server_fclean:
 
-#call re from Server/Makefile
+#call re from server/Makefile
 server_re:

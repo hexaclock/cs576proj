@@ -3,7 +3,7 @@ STAGE 	= beta
 DOC 	= doc/Makefile
 SRC 	= src/Makefile
 
-#call all from src/Makefile and docs/Makefile
+#call all from src/Makefile and doc/Makefile
 all:
 
 #call clean from src/Makefile and doc/Makefile
