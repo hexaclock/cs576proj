@@ -1,4 +1,4 @@
-CC       = clang++
+CXX      = clang++
 PRG      = server
 SRC      = connect_to_host.cpp get_listener.cpp panic.cpp main.cpp \
 		   start_proxy.cpp add_tls_cli.cpp add_tls_srv.cpp get_time.cpp \
@@ -13,8 +13,8 @@ CXXFLAGS  += -I$(OPENSSL) -I$(IPATH) -g -O2 -Wall -pedantic -std=c++11
 LDFLAGS  += -L../../openssl/ -Wl,--no-as-needed
 LDLIBS   += -ldl -lssl -lcrypto
 
-all: #$(OBJ)
-	$(CC) $(CXXFLAGS) $(LDFLAGS) $(SRC) -o $(PRG) $(LDLIBS)
+all: $(OBJ)
+	$(CXX) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $(PRG)
 
 clean:
 	$(RM) *.o
