@@ -1,26 +1,54 @@
 #include <wolfssl_server.h>
 
-bool register_user(const std::string &user, const std::string &secret)
-{
-    return false;
-}
+std::fstream userdb_file;
 
-bool auth_user(const std::string &user, std::string &secret, 
-               const std::string &dbpath)
+bool register_user(const std::string &user, const std::string &secret,
+                   const std::string &dbpath)
 {
     Json::Reader reader;
+    Json::StyledWriter writer;
     Json::Value root;
-    std::ifstream userdb_file;
+    std::string userdb_json( (std::istreambuf_iterator<char>(userdb_file)),
+                             std::istreambuf_iterator<char>() );
 
-
-    /* parse JSON file at path specified by dbpath */
-    userdb_file.open(dbpath);
-    if (!userdb_file.is_open())
+    if (!reader.parse(userdb_json, root, false))
     {
-        std::cout<<"[-] Could not open user database"<<std::endl;
+        std::cout<<"[-] Could not parse JSON from user database"<<std::endl;
         return false;
     }
 
+    /* fail if user already exists! */
+    if (root["users"].isMember(user))
+    {
+        std::cout<<"[-] Failed to register "<<user
+                 <<" because user already exists"<<std::endl;
+        return false;
+    }
+    
+    root["users"][user]["secret"] = secret;
+
+    std::string newjson = writer.write(root);
+
+    userdb_file.close();
+    userdb_file.open(dbpath, std::fstream::in | std::fstream::out | std::fstream::trunc);
+
+    if (userdb_file.is_open())
+        userdb_file << newjson;
+    else
+    {
+        std::cout<<"[-] Failed to write to user database"<<std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool auth_user(const std::string &user, std::string &secret)
+{
+    Json::Reader reader;
+    Json::Value root;
+
+    /* parse JSON file from userdb_file */
     std::string userdb_json( (std::istreambuf_iterator<char>(userdb_file)),
                              std::istreambuf_iterator<char>() );
 
@@ -33,8 +61,6 @@ bool auth_user(const std::string &user, std::string &secret,
     /* check if user exists */
     if (root["users"].isMember(user))
     {
-        std::cout<<user<<" attempts to auth"<<std::endl;
-
         Json::Value val;
         Json::StreamWriterBuilder builder;
         std::string storedsecret;
@@ -57,12 +83,9 @@ bool auth_user(const std::string &user, std::string &secret,
         //TODO: implement hashing of storedsecret
         if (storedsecret == secret)
         {
-            userdb_file.close();
             return true;
         }
     }
-
-    userdb_file.close();
 
     return false;
 }
@@ -122,7 +145,8 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
 
     while(std::getline(ss,part,':'))
     {
-        cmdparts.push_back(part);
+        if (part != "" && part != " ")
+            cmdparts.push_back(part);
     }
 
     if (cmdparts.size() < 3)
@@ -147,7 +171,7 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
     {
         if (cmdparts.size() == 3)
         {
-            if (!register_user(user,secret))
+            if (!register_user(user,secret,dbpath))
             {
                 std::cout<<"[-] "<<"Failed to to register user: "<<user<<std::endl;
             }
@@ -164,7 +188,7 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
     }
 
     /* authenticate user before any command processing */
-    if (!auth_user(user,secret,dbpath))
+    if (!auth_user(user,secret))
     {
         std::cout<<"[-] "<<user<<" failed to authenticate"<<std::endl;
         return;
@@ -297,6 +321,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    userdb_file.open(dbpath);
+    if (!userdb_file.is_open())
+    {
+        std::cout<<"[-] Could not open user database"<<std::endl;
+        return 1;
+    }
+
     if ( (socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
     {
         std::cout<<"Failed to initialize socket"<<std::endl;
@@ -375,6 +406,7 @@ int main(int argc, char **argv)
     wolfSSL_free(sslconn);
     wolfSSL_CTX_free(wsslctx);
     wolfSSL_Cleanup();
-    
+    userdb_file.close();
+
     return 0;
 }

@@ -1,7 +1,10 @@
 {
-    "users" : {
-        "danv" : {
-            "secret" : "testsecret"
-        }
-    }
+   "users" : {
+      "danv" : {
+         "secret" : "testsecret"
+      },
+      "dvinak" : {
+         "secret" : "mysecretkey"
+      }
+   }
 }
