@@ -1,0 +1,7 @@
+{
+    "users" : {
+        "danv" : {
+            "secret" : "testsecret"
+        }
+    }
+}
