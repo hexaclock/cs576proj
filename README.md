@@ -21,11 +21,14 @@ Our password manager for CS576.
 `help`: Displays this list of commands.
 
 ##Database file structure
-The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylocker.db.enc`.
+The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylocker.db`.
 
 ```
 {
-   "dbuser" : "username"
+   "dbuser"  : "username",
+   "srvhost" : "server_hostname",
+   "srvport" : "server_port",
+   "secret"  : "random_shared_secret",
    "dbentry" : {
       "service_username" : {
          "notes" : "notes go here",
