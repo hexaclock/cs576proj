@@ -1,19 +1,56 @@
 #include <wolfssl_server.h>
 
-std::fstream userdb_file;
+bool write_user_db(Json::Value *root, const std::string &dbpath)
+{
+    Json::StyledWriter writer;
+    std::ofstream userdb_file;
+    std::string userdb_json = writer.write(*root);
+
+    userdb_file.open(dbpath,std::ofstream::trunc);
+    if (!userdb_file.is_open())
+        return false;
+
+    userdb_file << userdb_json;
+    userdb_file.close();
+
+    return true;
+    
+}
+
+bool read_user_db(Json::Value *root, const std::string &dbpath)
+{
+    Json::Reader reader;
+    std::ifstream userdb_file;
+
+    userdb_file.open(dbpath);
+
+    if (!userdb_file.is_open())
+        return false;
+
+    std::string userdb_json( (std::istreambuf_iterator<char>(userdb_file)),
+                             std::istreambuf_iterator<char>() );
+
+    if (!reader.parse(userdb_json, *root, false))
+    {
+        userdb_file.close();
+        return false;
+    }
+
+    userdb_file.close();
+    
+    return true;
+}
 
 bool register_user(const std::string &user, const std::string &secret,
                    const std::string &dbpath)
 {
-    Json::Reader reader;
     Json::StyledWriter writer;
     Json::Value root;
-    std::string userdb_json( (std::istreambuf_iterator<char>(userdb_file)),
-                             std::istreambuf_iterator<char>() );
 
-    if (!reader.parse(userdb_json, root, false))
+
+    if (!read_user_db(&root,dbpath))
     {
-        std::cout<<"[-] Could not parse JSON from user database"<<std::endl;
+        std::cout<<"[-] Could not parse user database"<<std::endl;
         return false;
     }
 
@@ -26,15 +63,7 @@ bool register_user(const std::string &user, const std::string &secret,
     }
     
     root["users"][user]["secret"] = secret;
-
-    std::string newjson = writer.write(root);
-
-    userdb_file.close();
-    userdb_file.open(dbpath, std::fstream::in | std::fstream::out | std::fstream::trunc);
-
-    if (userdb_file.is_open())
-        userdb_file << newjson;
-    else
+    if (!write_user_db(&root,dbpath))
     {
         std::cout<<"[-] Failed to write to user database"<<std::endl;
         return false;
@@ -43,20 +72,18 @@ bool register_user(const std::string &user, const std::string &secret,
     return true;
 }
 
-bool auth_user(const std::string &user, std::string &secret)
+bool auth_user(const std::string &user, const std::string &secret,
+               const std::string &dbpath)
 {
     Json::Reader reader;
     Json::Value root;
 
-    /* parse JSON file from userdb_file */
-    std::string userdb_json( (std::istreambuf_iterator<char>(userdb_file)),
-                             std::istreambuf_iterator<char>() );
 
-    if (!reader.parse(userdb_json, root, false))
+    if (!read_user_db(&root,dbpath))
     {
-        std::cout<<"[-] Could not parse JSON from user database"<<std::endl;
+        std::cout<<"[-] Could not parse user database"<<std::endl;
         return false;
-    }
+    }    
 
     /* check if user exists */
     if (root["users"].isMember(user))
@@ -188,7 +215,7 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
     }
 
     /* authenticate user before any command processing */
-    if (!auth_user(user,secret))
+    if (!auth_user(user,secret,dbpath))
     {
         std::cout<<"[-] "<<user<<" failed to authenticate"<<std::endl;
         return;
@@ -321,12 +348,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    userdb_file.open(dbpath);
+    /*userdb_file.open(dbpath);
     if (!userdb_file.is_open())
     {
         std::cout<<"[-] Could not open user database"<<std::endl;
         return 1;
-    }
+        }*/
 
     if ( (socketfd = socket(AF_INET, SOCK_STREAM, 0)) == -1 )
     {
@@ -406,7 +433,6 @@ int main(int argc, char **argv)
     wolfSSL_free(sslconn);
     wolfSSL_CTX_free(wsslctx);
     wolfSSL_Cleanup();
-    userdb_file.close();
 
     return 0;
 }
