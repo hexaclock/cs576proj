@@ -11,6 +11,7 @@
 #include <netdb.h>
 #include <wolfssl/ssl.h>
 
-WOLFSSL* tls_connect(std::string hostname, int portnum);
+int tls_send(std::string &hostname, int portnum,
+             std::string &data);
 
 #endif
