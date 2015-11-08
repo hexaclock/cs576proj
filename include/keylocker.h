@@ -55,6 +55,7 @@ class Client
 
 /* class for creating/editing server
  */
+/*
 class Server
 {
     public:
@@ -71,7 +72,7 @@ class Server
     private:
         bool started;
 };
-
+*/
 /* class for reading and writing to a JSON database file
  */
 class JsonParsing

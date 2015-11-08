@@ -253,7 +253,7 @@ bool checkpass(std::string curpass)
  * post: runs the client side keylocker program
  * returns: 0 on success, something else on failure
  */
-int main(int argc, char **argv)
+int main()
 {
     char *tmp;
     int result;

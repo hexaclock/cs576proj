@@ -1,8 +1,30 @@
 #include <wolfssl_server.h>
 
-void process_data(std::string data)
+void process_data(const std::string &data)
 {
-    //cmd:secretkey:<possible b64 string>
+    //format is cmd:user:secretkey:<possible b64 string>
+    std::vector<std::string> cmdparts;
+    std::stringstream ss(data);
+    std::string part;
+
+    while(std::getline(ss,part,':'))
+    {
+        cmdparts.push_back(part);
+    }
+
+    if (cmdparts[0] == "UPLOAD")
+    {
+        std::cout<<"got UPLOAD"<<std::endl;
+    }
+    else if (cmdparts[0] == "DOWNLOAD")
+    {
+        std::cout<<"got DOWNLOAD"<<std::endl;
+    }
+    else if (cmdparts[0] == "REGISTER")
+    {
+        std::cout<<"got REGISTER"<<std::endl;
+    }
+
     return;
 }
 
@@ -21,10 +43,10 @@ std::string get_cli_data(WOLFSSL *sslconn)
         }
         else if (bytes_read < 0)
         {
-            return cli_data;
+            break;
         }
     }
-
+    wolfSSL_free(sslconn);
     return cli_data;
 }
 
@@ -147,6 +169,7 @@ int main(int argc, char **argv)
             data = get_cli_data(sslconn);
             process_data(data);
 
+            close(clisocketfd);
             break;
         }
 

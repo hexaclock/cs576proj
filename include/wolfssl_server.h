@@ -21,6 +21,9 @@
 /* C++ stuff */
 #include <iostream>
 #include <string>
+#include <sstream>
+#include <algorithm>
+#include <vector>
 
 /* C++ jsoncpp */
 #include "json/json.h"
