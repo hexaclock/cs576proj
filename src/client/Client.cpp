@@ -1,8 +1,5 @@
 #include "network.h"
 #include "keylocker.h"
-#include "json/json.h"
-
-#include <termios.h>
 
 std::string HELP_TEXT = "Commands can be any of the following:\
 \n\t'add [<length>]':\t\tAdds a new entry to the database with a random password \
@@ -268,6 +265,9 @@ int main()
     std::vector<std::string> args;
     bool newfile;
     Json::Value passdb;
+    Json::StreamWriterBuilder builder;
+    std::string srvname;
+    std::string srvport;
 
     newfile = false;
 
@@ -303,14 +303,27 @@ int main()
     if (newfile)
     {
         std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+
         std::cout<<"New database password: ";
         hideterm();
         std::getline(std::cin,dbpass);
         showterm();
         std::cout<<std::endl;
-        //std::cout<<"Generating RSA keypair..."<<std::endl;
-        //KLCrypto::generateRSA(kldir+"/");
-        passdb["dbuser"] = username;
+
+        std::cout<<"Server hostname: ";
+        std::getline(std::cin, srvname);
+        //std::cout<<std::endl;
+
+        std::cout<<"Server port: ";
+        std::getline(std::cin, srvport);
+        //std::cout<<std::endl;
+
+        passdb["dbuser"]  = username;
+        passdb["srvname"] = srvname;
+        passdb["srvport"] = srvport;
+
+        /*generate secret key*/
+        passdb["secret"] = KLCrypto::genpwd(64);
     }
     else
     {
@@ -328,6 +341,15 @@ int main()
             std::cout<<"User's password database file not found... Creating new file"<<std::endl;
             passdb["dbuser"] = username;
         }
+
+    /*set server hostname variable from database, strip quotes*/
+    srvname = Json::writeString(builder,passdb["srvname"]);
+    srvname.erase(remove(srvname.begin(), srvname.end(), '\"'), srvname.end());
+
+    /* set server portnum variable from database, strip quotes */
+    /* note srvport is a string */
+    srvport = Json::writeString(builder,passdb["srvport"]);
+    srvport.erase(remove(srvport.begin(), srvport.end(), '\"'), srvport.end());
 
     /*detect if new file, set username if so*/
     /*   if (!passdb.isMember("dbuser"))

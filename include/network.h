@@ -8,5 +8,6 @@
 #include <netinet/in.h>
 #include <signal.h>
 #include <netdb.h>
+#include <wolfssl/ssl.h>
 
 #endif

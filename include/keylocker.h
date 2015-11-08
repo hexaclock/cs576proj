@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <errno.h>
+#include <termios.h>
 /*C++ stuff*/
 #include <fstream>
 #include <iostream>
