@@ -312,12 +312,11 @@ int main()
 
         std::cout<<"Server hostname: ";
         std::getline(std::cin, srvname);
-        //std::cout<<std::endl;
-
+        
         std::cout<<"Server port: ";
         std::getline(std::cin, srvport);
-        //std::cout<<std::endl;
-
+        
+        /*set JSON key:value pairs*/
         passdb["dbuser"]  = username;
         passdb["srvname"] = srvname;
         passdb["srvport"] = srvport;

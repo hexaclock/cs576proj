@@ -31,7 +31,8 @@ bool JsonParsing::readJson(Json::Value* root, std::string dbName, std::string ke
         return false;
     }
 
-    std::cout<<ptxtjson<<std::endl;
+    //DEBUG
+    //std::cout<<ptxtjson<<std::endl;
     
     if (!reader.parse(ptxtjson, *root, false))
       {

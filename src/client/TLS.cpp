@@ -1,5 +1,4 @@
 #include "network.h"
-#include "keylocker.h"
 
 WOLFSSL* tls_connect(std::string hostname, int portnum)
 {
