@@ -166,8 +166,6 @@ int tls_send(std::string &hostname, int portnum,
          * DOWNLOAD:username:secretkey\n
          *
          */
-		if (data contains upload)
-				upload(wssl,
         return 0;
         
     }
