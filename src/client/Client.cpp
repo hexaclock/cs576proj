@@ -479,6 +479,35 @@ int main()
             break;
         else if (args[0] == "help")
             std::cout<<HELP_TEXT<<std::endl;
+		else if (args[0] == "register" || args[0] == "upload" || args[0] == "download")
+		{
+			std::string reqType;
+			std::string data;
+
+			//TODO: Need to replace secretKey with the secretkey from database
+			std::string secretKey = "";
+			if (args[0] == "register")
+			{
+				reqType = "REGISTER";
+				data = reqType + ":" + "username" + ":" + secretKey + "\n"; 
+			}
+			else if (args[0] == "download")
+			{
+				reqType = "DOWNLOAD";
+				data = reqType + ":" + "username" + ":" + secretKey + "\n";
+			}
+			else if (args[0] == "upload")
+			{
+				reqType = "UPLOAD";
+				/*I'm not sure if I can use passdb here directly??*/
+				//TODO: Need to modify the database format
+				data = reqType + ":" + "username" + ":" + secretKey + ":" + "passdb" + "\n";
+			}
+
+			int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
+			if (ret != 0)
+				std::cout << "TLS_send error code: " << ret << std::endl;
+		}
         else
             std::cout<<"Invalid command"<<std::endl;
 
