@@ -158,7 +158,6 @@ int tls_send(std::string &hostname, int portnum,
 
     if (wolfSSL_connect(wssl) == SSL_SUCCESS)
     {
-        //TODO: create functions for REGISTER, UPLOAD, DOWNLOAD
         /*
          * Format of std::string data:
          *
@@ -181,9 +180,12 @@ int tls_send(std::string &hostname, int portnum,
 		
 		/*return 1 stands for failure of requests processing*/
 		if (ret == false)
+		{
+			wolfSSL_free(wssl);
+			wolfSSL_CTX_free(wsctx);
+			wolfSSL_Cleanup();
 			return 1;
-        return 0;
-        
+		}
     }
 
     wolfSSL_free(wssl);
