@@ -1,7 +1,104 @@
 #include "network.h"
 
+#define MAXDATASIZE 20480		/*20k bytes*/
+
+bool regist (WOLFSSL* ssl, std::string &data) 
+{
+	char sendBuf[MAXDATASIZE], rcvBuf[MAXDATASIZE] = {0};
+	int ret = 0;
+
+	strcpy(sendBuf, data.c_str());
+	if (wolfSSL_write(ssl, sendBuf, strlen(sendBuf)) != (int)strlen(sendBuf))
+	{
+		ret = wolfSSL_get_error(ssl, 0);
+		std::cout << "WolfSSL write error. Error: " << ret << std::endl;
+		return false;
+	}
+
+	if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE) < 0)
+	{
+		ret = wolfSSL_get_error(ssl, 0);
+		std::cout << "WolfSSL read error. Error: " << ret << std::endl;
+	}
+	std::cout << "Recieved: " << rcvBuf << std::endl;
+	
+	return true;
+}
+
+bool upload (WOLFSSL* ssl, std::string &data)
+{
+	char sendBuf[MAXDATASIZE], rcvBuf[MAXDATASIZE] = {0};
+	int ret = 0;
+
+	strcpy(sendBuf, data.c_str());
+
+	if (wolfSSL_write(ssl, sendBuf, strlen(sendBuf)) != (int)strlen(sendBuf))
+	{
+		ret = wolfSSL_get_error(ssl, 0);
+		std::cout << "WolfSSL write error. Error: " << ret << std::endl;
+		return false;
+	}
+
+	if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE) < 0)
+	{
+		ret = wolfSSL_get_error(ssl, 0);
+		std::cout << "WolfSSL read error. Error: " << ret << std::endl;
+	}
+	std::cout << "Recieved: " << rcvBuf << std::endl;
+
+	return true;
+}
+
+/* pre:  pass request data; pass the path of database (~/.keyloker)
+ * post: update the database file with the one from server.
+ * return: true on success; false on failed
+ */
+bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
+{
+	char sendBuf[MAXDATASIZE], rcvBuf[MAXDATASIZE] = {0};
+	int ret;
+	std::string username;
+	std::string msg;
+	std::string filename;
+	std::string delimiter = ":";
+    std::string b64dat;
+
+    /*parse the data for file update*/
+//	msg.erase(0, msg.find(delimiter) + delimiter.length());
+//	username = msg.substr(0, msg.find(delimiter));
+//	filename = username + "_keylocker.db";
+//	std::ofstream fout(dbpath + '/' + filename);
+	std::ofstream fout(dbpath);
+
+	strcpy(sendBuf, data.c_str());
+
+	if (wolfSSL_write(ssl, sendBuf, strlen(sendBuf)) != (int)strlen(sendBuf))
+	{
+		ret = wolfSSL_get_error(ssl, 0);
+		std::cout << "WolfSSL write error. Error: " << ret << std::endl;
+		return false;
+	}
+
+	if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE) < 0)
+	{
+		ret = wolfSSL_get_error(ssl, 0);
+		std::cout << "WolfSSL read error. Error: " << ret << std::endl;
+	}
+	
+	std::cout << "Message recieved" <<std::endl;
+	std::string rcv= rcvBuf;
+    b64dat = rcv.substr(rcv.find_last_of(delimiter) + 1);
+
+	if (!fout.is_open())
+		return false;
+
+	fout << b64dat;
+	fout.close();
+	return true;
+}
+
 int tls_send(std::string &hostname, int portnum,
-             std::string &data)
+             std::string &data, std::string &dbpath)
 {
     struct sockaddr_in srvaddr;
     struct hostent *hst;
@@ -61,7 +158,6 @@ int tls_send(std::string &hostname, int portnum,
 
     if (wolfSSL_connect(wssl) == SSL_SUCCESS)
     {
-        //TODO: create functions for REGISTER, UPLOAD, DOWNLOAD
         /*
          * Format of std::string data:
          *
@@ -70,8 +166,26 @@ int tls_send(std::string &hostname, int portnum,
          * DOWNLOAD:username:secretkey\n
          *
          */
-        return 0;
-        
+		std::string delimiter = ":";
+		std::string msg = data;
+        std::string reqType = msg.substr(0, msg.find(delimiter));
+		bool ret;
+
+		if (reqType == "DOWNLOAD")
+			ret = download(wssl, data, dbpath);
+		else if (reqType == "UPLOAD")
+			ret = upload(wssl, data);
+		else if (reqType == "REGISTER")
+			ret = regist(wssl, data);
+		
+		/*return 1 stands for failure of requests processing*/
+		if (ret == false)
+		{
+			wolfSSL_free(wssl);
+			wolfSSL_CTX_free(wsctx);
+			wolfSSL_Cleanup();
+			return 1;
+		}
     }
 
     wolfSSL_free(wssl);

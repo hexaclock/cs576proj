@@ -95,4 +95,7 @@ public:
     static std::string genpwd(int len);
 };
 
+int tls_send(std::string &hostname, int portnum,
+             std::string &data, std::string &dbpath);
+
 #endif
