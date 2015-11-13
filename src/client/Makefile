@@ -1,7 +1,7 @@
 CXX      = clang++
-PRG	 = client
+PRG      = client
 SRC      = Client.cpp Crypto.cpp JsonParsing.cpp TLS.cpp \
-	   ../shared/jsoncpp.cpp ../shared/base64.cpp
+		   ../shared/jsoncpp.cpp ../shared/base64.cpp
 OBJ      = $(SRC:.cpp=.o)
 RM       = rm -f
 #OPENSSL  = /usr/include/openssl

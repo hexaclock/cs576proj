@@ -14,9 +14,9 @@ bool JsonParsing::readJson(Json::Value* root, std::string dbName, std::string ke
     Json::Reader reader;
     std::ifstream passdb_file;
     std::string ptxtjson;
-    
-    passdb_file.open(dbName);    
-    
+
+    passdb_file.open(dbName);
+
     if (!passdb_file.is_open())
       return false;
 
@@ -33,7 +33,7 @@ bool JsonParsing::readJson(Json::Value* root, std::string dbName, std::string ke
 
     //DEBUG
     //std::cout<<ptxtjson<<std::endl;
-    
+
     if (!reader.parse(ptxtjson, *root, false))
       {
         std::cout  << reader.getFormattedErrorMessages() << std::endl;
@@ -41,9 +41,9 @@ bool JsonParsing::readJson(Json::Value* root, std::string dbName, std::string ke
         exit(-3);
         return false;
       }
-    
+
     passdb_file.close();
-    
+
     return true;
 }
 

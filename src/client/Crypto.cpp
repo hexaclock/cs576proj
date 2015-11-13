@@ -41,7 +41,7 @@ std::string KLCrypto::dbEncrypt(std::string ptxt, std::string pass)
     int iter = 131072;
     int keylen = 16;
 
-    if ( wc_PBKDF2(key, passbytes, passlen, salt, 
+    if ( wc_PBKDF2(key, passbytes, passlen, salt,
                    saltlen, iter, keylen, SHA256) != 0)
         std::cout<<"Could not derive key from password"<<std::endl;
 
@@ -61,7 +61,7 @@ std::string KLCrypto::dbEncrypt(std::string ptxt, std::string pass)
         std::cout<<"Could not set encryption key"<<std::endl;
         return std::string();
     }
-    
+
     if (wc_AesGcmEncrypt(&enc, ctxt, plain, ptxtlen+pad, iv, 16, authTag,
                          sizeof(authTag), authIn, 1) != 0)
     {
@@ -125,7 +125,7 @@ std::string KLCrypto::dbDecrypt(std::string ctxt, std::string pass)
     memcpy(authTag,iv_authtag_ctxt+saltlen+16,16);
     memcpy(ctxtbytes,iv_authtag_ctxt+saltlen+16+16,outlen-48);
 
-    if ( wc_PBKDF2(key, passbytes, passlen, salt, 
+    if ( wc_PBKDF2(key, passbytes, passlen, salt,
                    saltlen, iter, keylen, SHA256) != 0)
         std::cout<<"Could not derive key from password"<<std::endl;
 
@@ -135,7 +135,7 @@ std::string KLCrypto::dbDecrypt(std::string ctxt, std::string pass)
         return std::string();
     }
 
-    if (wc_AesGcmDecrypt(&dec, ptxtbytes, ctxtbytes, outlen-48, iv, sizeof(iv), 
+    if (wc_AesGcmDecrypt(&dec, ptxtbytes, ctxtbytes, outlen-48, iv, sizeof(iv),
                          authTag, sizeof(authTag), authIn, 1) != 0)
     {
         std::cout<<"Decrypt failed!"<<std::endl;
@@ -150,28 +150,28 @@ std::string KLCrypto::dbDecrypt(std::string ctxt, std::string pass)
     free(ctxtbytes);
     free(ptxtbytes);
 
-    return ret;    
+    return ret;
 }
 
 std::string KLCrypto::genpwd(int pwdlen)
 {
-	if ( pwdlen <= 0 || pwdlen > 1024 )
-	{
-		std::cout << "Invalid password length!" << std::endl;
-		exit(123);
-	}
+    if ( pwdlen <= 0 || pwdlen > 1024 )
+    {
+        std::cout << "Invalid password length!" << std::endl;
+        exit(123);
+    }
 
-	int bytesin;
+    int bytesin;
 
-	if (pwdlen % 4) 										// if passwordlength is not a multiple of 4
-		bytesin = ((pwdlen * 3) / 4) + 1; // 3/4 the bytes needed as output are needed as input (+1)
-	else
-		bytesin = (pwdlen / 4) * 3; 			// 3/4 of the bytes needed as output are needed as input
+    if (pwdlen % 4)                                         // if passwordlength is not a multiple of 4
+        bytesin = ((pwdlen * 3) / 4) + 1; // 3/4 the bytes needed as output are needed as input (+1)
+    else
+        bytesin = (pwdlen / 4) * 3;             // 3/4 of the bytes needed as output are needed as input
 
-	byte *rand = KLCrypto::getRandBytes(bytesin);
-	std::string ret = base64_encode(rand, bytesin);
-	memset(rand,0,bytesin);
-	ret.resize(pwdlen);
+    byte *rand = KLCrypto::getRandBytes(bytesin);
+    std::string ret = base64_encode(rand, bytesin);
+    memset(rand,0,bytesin);
+    ret.resize(pwdlen);
 
-	return ret;
+    return ret;
 }

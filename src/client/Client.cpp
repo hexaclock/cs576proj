@@ -312,10 +312,10 @@ int main()
 
         std::cout<<"Server hostname: ";
         std::getline(std::cin, srvname);
-        
+
         std::cout<<"Server port: ";
         std::getline(std::cin, srvport);
-        
+
         /*set JSON key:value pairs*/
         passdb["dbuser"]  = username;
         passdb["srvname"] = srvname;
@@ -353,8 +353,8 @@ int main()
     /*detect if new file, set username if so*/
     /*   if (!passdb.isMember("dbuser"))
          passdb["dbuser"] = username;*/
-    /*if 'add' is the user's command*/
-    int argcnt;
+        /*if 'add' is the user's command*/
+        int argcnt;
     while(1)
     {
         std::cout << "KeyLocker> ";
@@ -479,52 +479,52 @@ int main()
             break;
         else if (args[0] == "help")
             std::cout<<HELP_TEXT<<std::endl;
-		else if (args[0] == "register" || args[0] == "upload" || args[0] == "download")
-		{
-			std::string reqType;
-			std::string data;
+        else if (args[0] == "register" || args[0] == "upload" || args[0] == "download")
+        {
+            std::string reqType;
+            std::string data;
 
-			std::string secretKey = Json::writeString(builder,passdb["secret"]);;
-			secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());
-				   
-			if (args[0] == "register")
-			{
-				reqType = "REGISTER";
-				data = reqType + ":" + username + ":" + secretKey + "\n"; 
-			}
-			else if (args[0] == "download")
-			{
-				reqType = "DOWNLOAD";
-				data = reqType + ":" + username + ":" + secretKey + "\n";
-			}
-			else if (args[0] == "upload")
-			{
-                            /*write file before doing upload*/
-                            if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
-                                panic("[-] Failed to write to user's password database file!", 3);
-				
-                            reqType = "UPLOAD";
-                            //Read database file into string
-                            Json::Reader reader;
-                            std::ifstream passdb_file;
-                            
-                            std::cout << dbpath << std::endl;
-                            passdb_file.open(dbpath);
-                            if (!passdb_file.is_open())
-                                panic("Fail to open database file. TLS send failed!", -1);
-                            
-                            std::string db_b64((std::istreambuf_iterator<char>(passdb_file)), std::istreambuf_iterator<char>());
-                            
-                            data = reqType + ":" + username + ":" + secretKey + ":" + db_b64 + "\n";
-                            passdb_file.close();
-                            //DEBUG
-                            //std::cout << data << std::endl;
-			}
-                        
-			int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
-			if (ret != 0)
-                            std::cout << "TLS_send error code: " << ret << std::endl;
-		}
+            std::string secretKey = Json::writeString(builder,passdb["secret"]);;
+            secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());
+
+            if (args[0] == "register")
+            {
+                reqType = "REGISTER";
+                data = reqType + ":" + username + ":" + secretKey + "\n";
+            }
+            else if (args[0] == "download")
+            {
+                reqType = "DOWNLOAD";
+                data = reqType + ":" + username + ":" + secretKey + "\n";
+            }
+            else if (args[0] == "upload")
+            {
+                /*write file before doing upload*/
+                if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
+                    panic("[-] Failed to write to user's password database file!", 3);
+
+                reqType = "UPLOAD";
+                //Read database file into string
+                Json::Reader reader;
+                std::ifstream passdb_file;
+
+                std::cout << dbpath << std::endl;
+                passdb_file.open(dbpath);
+                if (!passdb_file.is_open())
+                    panic("Fail to open database file. TLS send failed!", -1);
+
+                std::string db_b64((std::istreambuf_iterator<char>(passdb_file)), std::istreambuf_iterator<char>());
+
+                data = reqType + ":" + username + ":" + secretKey + ":" + db_b64 + "\n";
+                passdb_file.close();
+                //DEBUG
+                //std::cout << data << std::endl;
+            }
+
+            int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
+            if (ret != 0)
+                std::cout << "TLS_send error code: " << ret << std::endl;
+        }
         else
             std::cout<<"Invalid command"<<std::endl;
 
