@@ -9,6 +9,9 @@
       "dvinak" : {
          "secret" : "mysecretkey"
       },
+      "dvinakov" : {
+         "secret" : "zOCcROX9C1IFEjPitCmz1+NxtmSeJhzKbKNNhHCNUMz28rp//TRKRgl6pBIz53lI"
+      },
       "newuser" : {
          "secret" : "secretz"
       }

@@ -193,6 +193,8 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
         b64dat = cmdparts[3];
     }
 
+    //std::cout<<"[DEBUG] "<<data<<std::endl;
+
     /* client wishes to register */
     if (cmd == "REGISTER")
     {
@@ -273,12 +275,15 @@ std::string get_cli_data(WOLFSSL *sslconn)
     char tempbuf[4096];
     std::string cli_data;
 
+    //std::cout<<"started get_cli_data function"<<std::endl;
+
     while(1)
     {
-        memset(&tempbuf,0,sizeof(tempbuf));
+        memset(tempbuf,0,sizeof(tempbuf));
         if ( (bytes_read = wolfSSL_read(sslconn,tempbuf,sizeof(tempbuf)-2)) > 0 )
         {
             cli_data += std::string(tempbuf);
+            std::cout<<"[DEBUG] "<<cli_data<<std::endl;
             if (tempbuf[bytes_read-1] == '\n')
             {
                 //remove '\n' from string
@@ -420,8 +425,11 @@ int main(int argc, char **argv)
             std::cout<<"[+] Client connected from IP address: "<<cliipaddr
                      <<std::endl;
             sslconn = start_ssl(wsslctx,clisocketfd,cliaddr);
+            //std::cout<<"started ssl"<<std::endl;
             data = get_cli_data(sslconn);
+            //std::cout<<"got data: "<<data<<std::endl;
             process_data(data,dbpath,sslconn);
+            //std::cout<<"processed data"<<std::endl;
 
             close(clisocketfd);
             break;
@@ -429,7 +437,7 @@ int main(int argc, char **argv)
 
         usleep(1000);
     }
-    close(clisocketfd);
+    //close(clisocketfd);
     wolfSSL_free(sslconn);
     wolfSSL_CTX_free(wsslctx);
     wolfSSL_Cleanup();
