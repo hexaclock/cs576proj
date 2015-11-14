@@ -10,7 +10,8 @@
          "secret" : "mysecretkey"
       },
       "dvinakov" : {
-         "secret" : "zOCcROX9C1IFEjPitCmz1+NxtmSeJhzKbKNNhHCNUMz28rp//TRKRgl6pBIz53lI"
+         "salt" : "MUlYrErMIwROL/M8WOQIwQ==",
+         "secret" : "knCxZ5XKdvdyZLo/o4aH3lJjvfFAgkIHHMSA87nXoME="
       },
       "newuser" : {
          "secret" : "secretz"

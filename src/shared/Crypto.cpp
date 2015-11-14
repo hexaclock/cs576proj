@@ -1,6 +1,59 @@
 #include "keylocker.h"
 #include "network.h"
 
+std::string KLCrypto::hexify(unsigned char c)
+{
+    std::stringstream ss;
+    ss << std::hex << (int)c;
+
+    return ss.str();    
+}
+
+/*std::string KLCrypto::getHexStr(const char *s, unsigned int slen)
+{
+    unsigned int i;
+    std::string ret = "";
+
+    for (i=0; i<slen; ++i)
+        ret += hexify(s[i]);
+
+    return ret;
+    }*/
+
+std::string KLCrypto::pbkdf2hash(const std::string &str, const byte *salt,
+                                 int saltlen)
+{
+    int iter = 131073;
+    byte hash[SHA256_DIGEST_SIZE];
+    const byte *strbytes = (const byte*)str.c_str();
+
+    if ( wc_PBKDF2(hash, strbytes, str.size(), salt,
+                   saltlen, iter, sizeof(hash), SHA256) != 0 )
+    {
+        return "";
+    }
+
+    std::string ret = base64_encode(hash,sizeof(hash));
+
+    return ret;
+}
+
+std::string KLCrypto::sha256sum(const std::string &str)
+{
+    byte shasum[SHA256_DIGEST_SIZE];
+    const char *strc = str.c_str();
+    std::string ret;
+    
+    wc_Sha256Hash((const byte*)strc, strlen(strc), shasum);
+
+    for (int i=0; i<(int)sizeof(shasum); ++i)
+        ret += hexify(shasum[i]);
+
+    //ret = base64_encode(shasum,SHA256_DIGEST_SIZE);
+
+    return ret;
+}
+
 byte* KLCrypto::getRandBytes(int nbytes)
 {
     RNG rng;
@@ -146,7 +199,6 @@ std::string KLCrypto::dbDecrypt(std::string ctxt, std::string pass)
 
     memset(key,0,sizeof(key));
     memset(ptxtbytes,0,ret.size());
-    //free(salt);
     free(ctxtbytes);
     free(ptxtbytes);
 
@@ -163,10 +215,10 @@ std::string KLCrypto::genpwd(int pwdlen)
 
     int bytesin;
 
-    if (pwdlen % 4)                                         // if passwordlength is not a multiple of 4
+    if (pwdlen % 4) // if passwordlength is not a multiple of 4
         bytesin = ((pwdlen * 3) / 4) + 1; // 3/4 the bytes needed as output are needed as input (+1)
     else
-        bytesin = (pwdlen / 4) * 3;             // 3/4 of the bytes needed as output are needed as input
+        bytesin = (pwdlen / 4) * 3; // 3/4 of the bytes needed as output are needed as input
 
     byte *rand = KLCrypto::getRandBytes(bytesin);
     std::string ret = base64_encode(rand, bytesin);
