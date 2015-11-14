@@ -55,26 +55,6 @@ class Client
 
 };
 
-/* class for creating/editing server
- */
-/*
-class Server
-{
-    public:
-        int start();
-        bool addUser(std::string username, std::string pubkey)
-        {
-            return true;
-        };
-        bool deleteUser(std::string username)
-        {
-            return true;
-        };
-
-    private:
-        bool started;
-};
-*/
 /* class for reading and writing to a JSON database file
  */
 class JsonParsing
