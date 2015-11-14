@@ -9,16 +9,47 @@ std::string KLCrypto::hexify(unsigned char c)
     return ss.str();    
 }
 
+/*std::string KLCrypto::getHexStr(const char *s, unsigned int slen)
+{
+    unsigned int i;
+    std::string ret = "";
+
+    for (i=0; i<slen; ++i)
+        ret += hexify(s[i]);
+
+    return ret;
+    }*/
+
+std::string KLCrypto::pbkdf2hash(const std::string &str, const byte *salt,
+                                 int saltlen)
+{
+    int iter = 131073;
+    byte hash[SHA256_DIGEST_SIZE];
+    const byte *strbytes = (const byte*)str.c_str();
+
+    if ( wc_PBKDF2(hash, strbytes, str.size(), salt,
+                   saltlen, iter, sizeof(hash), SHA256) != 0 )
+    {
+        return "";
+    }
+
+    std::string ret = base64_encode(hash,sizeof(hash));
+
+    return ret;
+}
+
 std::string KLCrypto::sha256sum(const std::string &str)
 {
     byte shasum[SHA256_DIGEST_SIZE];
     const char *strc = str.c_str();
-    std::string ret = "";
+    std::string ret;
     
     wc_Sha256Hash((const byte*)strc, strlen(strc), shasum);
 
     for (int i=0; i<(int)sizeof(shasum); ++i)
         ret += hexify(shasum[i]);
+
+    //ret = base64_encode(shasum,SHA256_DIGEST_SIZE);
 
     return ret;
 }

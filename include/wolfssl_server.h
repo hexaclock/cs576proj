@@ -47,6 +47,8 @@ public:
     static std::string genpwd(int len);
     static std::string sha256sum(const std::string &str);
     static std::string hexify(unsigned char c);
+    static std::string pbkdf2hash(const std::string &str, const byte *salt,
+                                  int saltlen);
 };
 
 

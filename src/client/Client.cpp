@@ -348,7 +348,7 @@ int main()
         passdb["srvport"] = srvport;
 
         /*generate secret key*/
-        passdb["secret"] = KLCrypto::genpwd(64);
+        //passdb["secret"] = KLCrypto::genpwd(64);
     }
     else
     {
@@ -521,7 +521,7 @@ int main()
               secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());*/
             std::string secretKey = KLCrypto::sha256sum(dbpass);
             //DEBUG
-            //std::cout<<secretKey<<std::endl;
+            std::cout<<secretKey<<std::endl;
 
             if (args[0] == "register")
             {

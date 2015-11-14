@@ -46,6 +46,8 @@ bool register_user(const std::string &user, const std::string &secret,
 {
     Json::StyledWriter writer;
     Json::Value root;
+    byte *salt;
+    std::string hash;
 
 
     if (!read_user_db(&root,dbpath))
@@ -61,8 +63,18 @@ bool register_user(const std::string &user, const std::string &secret,
                  <<" because user already exists"<<std::endl;
         return false;
     }
-    
-    root["users"][user]["secret"] = secret;
+
+    salt = KLCrypto::getRandBytes(16);
+    hash = KLCrypto::pbkdf2hash(secret,salt,16);
+    if (hash == "")
+    {
+        std::cout<<"[-] Failed to compute password hash for new user: "<<user
+                 <<std::endl;
+        return false;
+    }
+    root["users"][user]["secret"] = hash;
+    root["users"][user]["salt"]   = base64_encode(salt, 16);
+
     if (!write_user_db(&root,dbpath))
     {
         std::cout<<"[-] Failed to write to user database"<<std::endl;
@@ -91,27 +103,31 @@ bool auth_user(const std::string &user, const std::string &secret,
         Json::Value val;
         Json::StreamWriterBuilder builder;
         std::string storedsecret;
+        std::string storedsalt;
+        const byte *salt_bytes;
 
         val = root["users"][user]["secret"];
         storedsecret = Json::writeString(builder,val);
-
+        val = root["users"][user]["salt"];
+        storedsalt   = Json::writeString(builder,val);
         //strip quotes
         storedsecret = storedsecret.substr(1,storedsecret.size()-2);
-
+        storedsalt   = storedsalt.substr(1,storedsalt.size()-2);
         
-        /*
-          std::cout<<"Stored secret: "<<storedsecret<<std::endl;
-          std::cout<<"User supplied secret: "<<secret<<std::endl;
-          if (secret.size() == storedsecret.size())
-          std::cout<<"Secrets are of same size"<<std::endl;
-        */
+        salt_bytes = (const byte*)(base64_decode(storedsalt).c_str());
+        std::string hash = KLCrypto::pbkdf2hash(secret,salt_bytes,16);
+
+        //DEBUG
+        //std::cout<<"Stored secret: "<<storedsecret<<" "<< storedsecret.size() <<std::endl;
+        //std::cout<<"Supplied secret: "<<hash<<" "<< hash.size() <<std::endl;
         
 
-        //TODO: implement hashing of storedsecret
-        if (storedsecret == secret)
+        if ( storedsecret == hash )
         {
+            //std::cout<<"Secrets match"<<std::endl;
             return true;
         }
+        
     }
 
     return false;
