@@ -348,7 +348,7 @@ int main()
         passdb["srvport"] = srvport;
 
         /*generate secret key*/
-        passdb["secret"] = KLCrypto::genpwd(64);
+        //passdb["secret"] = KLCrypto::genpwd(64);
     }
     else
     {
@@ -409,13 +409,13 @@ int main()
             else
                 std::cout<<"usage: get [<service> <username>]"<<std::endl;
         }
-				else if (args[0] == "clip")
-				{
-					if (argcnt == 3)
-						clip(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
-					else
-						std::cout<<"usage: clip [<service> <username>]"<<std::endl;
-				}
+        else if (args[0] == "clip")
+        {
+            if (argcnt == 3)
+                clip(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
+            else
+                std::cout<<"usage: clip [<service> <username>]"<<std::endl;
+        }
         else if (args[0] == "delete")
         {
             if (argcnt == 3)
@@ -517,8 +517,11 @@ int main()
             std::string reqType;
             std::string data;
 
-            std::string secretKey = Json::writeString(builder,passdb["secret"]);;
-            secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());
+            /*std::string secretKey = Json::writeString(builder,passdb["secret"]);;
+              secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());*/
+            std::string secretKey = KLCrypto::sha256sum(dbpass);
+            //DEBUG
+            std::cout<<secretKey<<std::endl;
 
             if (args[0] == "register")
             {
@@ -544,7 +547,7 @@ int main()
                 std::cout << dbpath << std::endl;
                 passdb_file.open(dbpath);
                 if (!passdb_file.is_open())
-                    panic("Fail to open database file. TLS send failed!", -1);
+                    panic("Failed to open database file. TLS send failed!", -1);
 
                 std::string db_b64((std::istreambuf_iterator<char>(passdb_file)), std::istreambuf_iterator<char>());
 
@@ -555,8 +558,8 @@ int main()
             }
 
             int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
-            if (ret != 0)
-                std::cout << "TLS_send error code: " << ret << std::endl;
+            /*if (ret != 0)
+              std::cout << "TLS_send error code: " << ret << std::endl;*/
         }
         else
             std::cout<<"Invalid command"<<std::endl;
