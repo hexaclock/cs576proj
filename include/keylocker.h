@@ -20,6 +20,7 @@
 #include <wolfssl/options.h>
 #include <wolfssl/wolfcrypt/aes.h>
 #include <wolfssl/wolfcrypt/sha256.h>
+#include <wolfssl/wolfcrypt/hash.h>
 #include <wolfssl/wolfcrypt/random.h>
 #include <wolfssl/wolfcrypt/pwdbased.h>
 #include <wolfssl/wolfcrypt/coding.h>
@@ -93,6 +94,8 @@ public:
     static std::string dbEncrypt(std::string ptxt, std::string pass);
     static std::string dbDecrypt(std::string ctxt, std::string pass);
     static std::string genpwd(int len);
+    static std::string sha256sum(const std::string &str);
+    static std::string hexify(unsigned char c);
 };
 
 int tls_send(std::string &hostname, int portnum,
