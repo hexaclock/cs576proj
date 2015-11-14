@@ -66,7 +66,7 @@ void showterm()
  */
 bool prompt_y_n(std::string question, std::string ans_default)
 {
-    std::string response;
+    std::string res;
     std::string yn;
 
     if (ans_default == "yes")
@@ -81,22 +81,22 @@ bool prompt_y_n(std::string question, std::string ans_default)
     //prompt user
     std::cout << question + yn;
 
-    getline(std::cin, response);
+    getline(std::cin, res);
     std::cin.sync();
-    std::transform(response.begin(), response.end(), response.begin(), ::tolower);
+    std::transform(res.begin(), res.end(), res.begin(), ::tolower);
 
     do
     {
-        if (response == "yes" || response == "y")
+        if (res == "yes" || res == "y")
             return true;
-        else if (response == "no" || response == "n")
+        else if (res == "no" || res == "n")
             return false;
         else
             std::cout << "Please type 'yes' or 'no': ";
 
-        getline(std::cin, response);
+        getline(std::cin, res);
         std::cin.sync();
-        std::transform(response.begin(), response.end(), response.begin(), ::tolower);
+        std::transform(res.begin(), res.end(), res.begin(), ::tolower);
     } while (1);
 }
 
@@ -113,26 +113,26 @@ void add_entry(Json::Value *passdb, int randlen)
     std::string notes;
     std::string entry;
 
-    std::cout<<"Service:  ";
+    std::cout << "Service:  ";
     std::getline(std::cin,service);
     std::cin.sync();
 
-    std::cout<<"Username: ";
+    std::cout << "Username: ";
     std::getline(std::cin,username);
     std::cin.sync();
 
-    std::cout<<"Notes:    ";
+    std::cout << "Notes:    ";
     std::getline(std::cin,notes);
     std::cin.sync();
 
     if (randlen > 0)
     {
         password = gen(randlen);
-        std::cout<<"Password :"<<std::endl<<password;
+        std::cout << "Password :" << std::endl << password;
     }
     else
     {
-        std::cout<<"Password: ";
+        std::cout << "Password: ";
         hideterm();
         std::getline(std::cin,password);
         showterm();
@@ -140,7 +140,8 @@ void add_entry(Json::Value *passdb, int randlen)
     }
 
     entry = service + "_" + username;
-    // If an entry is exist, user cannot overwrite it. This will prevent some fault operation.
+    // If an entry is exist, user cannot overwrite it.
+    // This will prevent some fault operation.
     if ((*passdb)["dbentry"].isMember(entry))
     {
         panic("Entry already exists", 4);
@@ -274,15 +275,15 @@ int update_entry(Json::Value *passdb, std::string request)
 
     if ((*passdb)["dbentry"].isMember(request))
     {
-        std::cout<<"Password: ";
+        std::cout << "Password: ";
         hideterm();
         std::getline(std::cin,password);
         showterm();
         std::cin.sync();
 
-        std::cout<<"\nNotes:    ";
+        std::cout << "\nNotes:    ";
         std::getline(std::cin,notes);
-        std::cout<<"\n";
+        std::cout << "\n";
         std::cin.sync();
 
         entry = request;
@@ -302,7 +303,7 @@ bool checkpass(std::string curpass)
 {
     std::string testpass;
     //std::string newpass;
-    std::cout<<"Current password: ";
+    std::cout << "Current password: ";
     hideterm();
     std::getline(std::cin,testpass);
     showterm();
@@ -370,20 +371,20 @@ int main()
     if (newfile)
     {
         /* TODO: prompt if user wants to download from remote */
-        std::cout<<"No local password database was found..."<<std::endl;
+        std::cout << "No local password database was found..." << std::endl;
 
-        std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+        std::cout << "User's password database file not found... Creating new file" << std::endl;
 
-        std::cout<<"New database password: ";
+        std::cout << "New database password: ";
         hideterm();
         std::getline(std::cin,dbpass);
         showterm();
-        std::cout<<std::endl;
+        std::cout << std::endl;
 
-        std::cout<<"Server hostname: ";
+        std::cout << "Server hostname: ";
         std::getline(std::cin, srvname);
 
-        std::cout<<"Server port: ";
+        std::cout << "Server port: ";
         std::getline(std::cin, srvport);
 
         /*set JSON key:value pairs*/
@@ -397,17 +398,17 @@ int main()
     else
     {
         std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
-        std::cout<<"Database password: ";
+        std::cout << "Database password: ";
         hideterm();
         std::getline(std::cin,dbpass);
         showterm();
-        std::cout<<std::endl;
+        std::cout << std::endl;
     }
 
     if (!newfile)
         if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
         {
-            std::cout<<"User's password database file not found... Creating new file"<<std::endl;
+            std::cout << "User's password database file not found... Creating new file" << std::endl;
             passdb["dbuser"] = username;
         }
 
@@ -451,14 +452,14 @@ int main()
             else if (argcnt == 1) /* prg get */
                 get_entry(&passdb, "");
             else
-                std::cout<<"usage: get [<service> <username>]"<<std::endl;
+                std::cout << "usage: get [<service> <username>]" << std::endl;
         }
         else if (args[0] == "clip")
         {
             if (argcnt == 3)
                 clip(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
             else
-                std::cout<<"usage: clip [<service> <username>]"<<std::endl;
+                std::cout << "usage: clip [<service> <username>]" << std::endl;
         }
         else if (args[0] == "delete")
         {
@@ -482,7 +483,7 @@ int main()
                     break;
             }
             else
-                std::cout<<"usage: delete [<service> <username>]"<<std::endl;
+                std::cout << "usage: delete [<service> <username>]" << std::endl;
         }
         else if (args[0] == "edit")
         {
@@ -496,11 +497,11 @@ int main()
                 }
                 else if (ret == 1)
                 {
-                    std::cout<<"No such entry, please check your input"<<std::endl;
+                    std::cout << "No such entry, please check your input" << std::endl;
                 }
             }
             else
-                std::cout<<"usage: edit [<service> <username>]"<<std::endl;
+                std::cout << "usage: edit [<service> <username>]" << std::endl;
         }
         else if (args[0] == "chpass")
         {
@@ -509,11 +510,11 @@ int main()
 
             if (checkpass(dbpass))
             {
-                std::cout<<std::endl<<"New password: ";
+                std::cout << std::endl << "New password: ";
                 hideterm();
                 std::getline(std::cin,newpass);
                 showterm();
-                std::cout<<std::endl<<"Retype new password: ";
+                std::cout << std::endl << "Retype new password: ";
                 hideterm();
                 std::getline(std::cin,confirmnewpass);
                 showterm();
@@ -525,28 +526,28 @@ int main()
                         panic("[-] Failed to update user's password", 3);
                     }
                     else
-                        std::cout<<std::endl<<"Password updated successfully"<<std::endl;
+                        std::cout << std::endl << "Password updated successfully" << std::endl;
                 }
                 else
                 {
-                    std::cout<<std::endl<<"Typo detected! Password not changed"<<std::endl;
+                    std::cout << std::endl << "Typo detected! Password not changed" << std::endl;
                 }
             }
             else
-                std::cout<<std::endl<<"Incorrect password"<<std::endl;
+                std::cout << std::endl << "Incorrect password" << std::endl;
         }
         else if (args[0] == "gen")
         {
             if (argcnt == 2)
                 if (atoi(args[1].c_str()) > 0)
-                    std::cout<<gen(atoi(args[1].c_str()))<<std::endl;
+                    std::cout << gen(atoi(args[1].c_str())) << std::endl;
                 else
-                    std::cout<<"usage: gen <password length>"<<std::endl;
+                    std::cout << "usage: gen <password length>" << std::endl;
         }
         else if (args[0] == "quit")
             break;
         else if (args[0] == "help")
-            std::cout<<HELP_TEXT<<std::endl;
+            std::cout << HELP_TEXT << std::endl;
         else if (args[0] == "register" || args[0] == "upload" || args[0] == "download")
         {
             std::string reqType;
@@ -556,7 +557,7 @@ int main()
               secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());*/
             std::string secretKey = KLCrypto::sha256sum(dbpass);
             //DEBUG
-            std::cout<<secretKey<<std::endl;
+            std::cout << secretKey << std::endl;
 
             if (args[0] == "register")
             {
@@ -597,13 +598,13 @@ int main()
               std::cout << "TLS_send error code: " << ret << std::endl;*/
         }
         else
-            std::cout<<"Invalid command"<<std::endl;
+            std::cout << "Invalid command" << std::endl;
 
 
         cmdline = "";
         args.clear();
         argcnt = 0;
-        std::cout<<std::endl;
+        std::cout << std::endl;
     }
 
     if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
