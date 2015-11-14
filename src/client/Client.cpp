@@ -57,6 +57,49 @@ void showterm()
     tcsetattr(STDIN_FILENO, TCSANOW, &tty);
 }
 
+/* pre: takes in a std::string question and std::string ans_default which MUST
+ *      be either 'yes' or 'no'
+ * post: prompts the user with question followed by a (yes/no) string which will
+ *      be altered to (YES/no) if ans_default is yes and (yes/NO) if ans_default
+ *      is no, otherwise ans_default should be NULL
+ * return: true if the user responds yes and false if the user responds no
+ */
+bool prompt_y_n(std::string question, std::string ans_default)
+{
+    std::string response;
+    std::string yn;
+
+    if (ans_default == "yes")
+        yn = " (YES/no) ";
+    else if (ans_default == "no")
+        yn = " (yes/NO) ";
+    else if (ans_default.empty())
+        yn = " (yes/no) ";
+    else
+        panic("Provided incorrect parameters to function `prompt_y_n`!!", 42);
+
+    //prompt user
+    std::cout << question + yn;
+
+    getline(std::cin, response);
+    std::cin.sync();
+    std::transform(response.begin(), response.end(), response.begin(), ::tolower);
+
+    do
+    {
+        if (response == "yes" || response == "y")
+            return true;
+        else if (response == "no" || response == "n")
+            return false;
+        else
+            std::cout << "Please type 'yes' or 'no': ";
+
+        getline(std::cin, response);
+        std::cin.sync();
+        std::transform(response.begin(), response.end(), response.begin(), ::tolower);
+    } while (1);
+}
+
 /* pre: takes in a Json::Value* passdb
  * post: reads in user input and creates a new keylocker database entry with the
  *      provided input in passdb
@@ -171,27 +214,27 @@ void get_entry(Json::Value *passdb, std::string request)
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
-   post: copies the pass for the request to the clipboard,
-         then overwrites clipboard when user is done
+post: copies the pass for the request to the clipboard,
+then overwrites clipboard when user is done
 */
 void clip(Json::Value *passdb, std::string request)
 {
-  std::string pass;
+    std::string pass;
 
-  if ((*passdb)["dbentry"].isMember(request))
-  {
-    pass = (*passdb)["dbentry"][request]["password"].asString();
-    pass = "echo -n \"" + pass + "\" | xclip -selection clipboard";
-    system((const char*)pass.c_str());
+    if ((*passdb)["dbentry"].isMember(request))
+    {
+        pass = (*passdb)["dbentry"][request]["password"].asString();
+        pass = "echo -n \"" + pass + "\" | xclip -selection clipboard";
+        system((const char*)pass.c_str());
 
-    std::cout << "Password copied to clipboard. Press enter to overwrite clipboard.";
-    std::getline(std::cin, pass);
-    std::cin.sync();
-    pass = "echo -n \" \" | xclip -selection clipboard";
-    system((const char*)pass.c_str());
-  }
-  else
-    std::cout << "Entry doesn't exist!" << std::endl;
+        std::cout << "Password copied to clipboard. Press enter to overwrite clipboard.";
+        std::getline(std::cin, pass);
+        std::cin.sync();
+        pass = "echo -n \" \" | xclip -selection clipboard";
+        system((const char*)pass.c_str());
+    }
+    else
+        std::cout << "Entry doesn't exist!" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -281,6 +324,7 @@ int main()
     char *tmp;
     int result;
     std::string username;
+    std::string remoteusername;
     std::string homepath;
     std::string servname;
     std::string dbname;
@@ -296,9 +340,6 @@ int main()
     std::string srvport;
 
     newfile = false;
-
-    /*if (argc < 2)
-      panic("usage: " + (std::string)argv[0] + " <command> <options>", 1);*/
 
     /*
      * we'd use secure_getenv, but linux lab is out of date
@@ -328,6 +369,9 @@ int main()
 
     if (newfile)
     {
+        /* TODO: prompt if user wants to download from remote */
+        std::cout<<"No local password database was found..."<<std::endl;
+
         std::cout<<"User's password database file not found... Creating new file"<<std::endl;
 
         std::cout<<"New database password: ";
@@ -379,9 +423,8 @@ int main()
     /*detect if new file, set username if so*/
     /*   if (!passdb.isMember("dbuser"))
          passdb["dbuser"] = username;*/
-        /*if 'add' is the user's command*/
         int argcnt;
-    while(1)
+    while(1) /* main loop */
     {
         std::cout << "KeyLocker> ";
         std::getline(std::cin,cmdline);
@@ -393,6 +436,7 @@ int main()
 
         if (argcnt == 0)
             continue;
+        /*if 'add' is the user's command*/
         else if (args[0] == "add")
         {
             if (argcnt > 1 && atoi(args[1].c_str()))
@@ -409,42 +453,33 @@ int main()
             else
                 std::cout<<"usage: get [<service> <username>]"<<std::endl;
         }
-				else if (args[0] == "clip")
-				{
-					if (argcnt == 3)
-						clip(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
-					else
-						std::cout<<"usage: clip [<service> <username>]"<<std::endl;
-				}
+        else if (args[0] == "clip")
+        {
+            if (argcnt == 3)
+                clip(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
+            else
+                std::cout<<"usage: clip [<service> <username>]"<<std::endl;
+        }
         else if (args[0] == "delete")
         {
             if (argcnt == 3)
             {
-                std::string confirm;
-                std::cout << "Are you sure wish to delete " +
-                    (std::string)args[1] + "_" +
-                    (std::string)args[2] + " entry? (yes/no): ";
-                while (1)
+                if (prompt_y_n("Are you sure you wish to delete "
+                            + (std::string)args[1] + "_" + (std::string)args[2] + "?",
+                            NULL))
                 {
-                    getline(std::cin, confirm);
-                    std::cin.sync();
-                    if (!strcmp(confirm.c_str(), "yes"))
+                    int ret = delete_entry(&passdb, (std::string)args[1] +
+                            "_" + (std::string)args[2]);
+                    if (ret == 0)
                     {
-                        int ret = delete_entry(&passdb, (std::string)args[1] +
-                                "_" + (std::string)args[2]);
-                        if (ret == 0)
-                        {
-                            std::cout << "Entry deleted" << std::endl;
-                            break;
-                        }
-                        else if (ret == 1)
-                            std::cout << "No such entry, please check your input" << std::endl;
-                    }
-                    else if (!strcmp(confirm.c_str(), "no"))
+                        std::cout << "Entry deleted" << std::endl;
                         break;
-                    else
-                        std::cout << "Please type 'yes' or 'no': ";
+                    }
+                    else if (ret == 1)
+                        std::cout << "No such entry, please check your input" << std::endl;
                 }
+                else
+                    break;
             }
             else
                 std::cout<<"usage: delete [<service> <username>]"<<std::endl;
