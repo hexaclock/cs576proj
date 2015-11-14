@@ -299,6 +299,10 @@ int update_entry(Json::Value *passdb, std::string request)
         return 1;
 }
 
+/* pre: takes in a std:string curpass
+ * post: checks if the password is correct
+ * return: returns true if curpass is correct, else false
+ */
 bool checkpass(std::string curpass)
 {
     std::string testpass;
@@ -324,21 +328,27 @@ int main()
 {
     char *tmp;
     int result;
-    std::string username;
-    std::string remoteusername;
-    std::string homepath;
-    std::string servname;
-    std::string dbname;
-    std::string dbpath;
-    std::string dbpass;
-    std::string kldir;
+
+    //remote things
+    std::string srvname; //the name of remote server
+    std::string srvport; //the port of the remote server
+    std::string srvuname; //username for communication with server
+    std::string reqType; //server request type
+    std::string data; //server request data
+    std::string secretKey; //server secret key
+
+    //local things
+    std::string username; //local username for creating files
+    std::string homepath; //local user home directory
+    std::string dbname; //name of the local database file
+    std::string dbpath; //path to the local database file
+    std::string dbpass; //password for the local database file
+    std::string kldir; //directory for keylocker files
     std::string cmdline;
     std::vector<std::string> args;
     bool newfile;
     Json::Value passdb;
     Json::StreamWriterBuilder builder;
-    std::string srvname;
-    std::string srvport;
 
     newfile = false;
 
@@ -370,27 +380,57 @@ int main()
 
     if (newfile)
     {
-        /* TODO: prompt if user wants to download from remote */
         std::cout << "No local password database was found..." << std::endl;
 
-        std::cout << "User's password database file not found... Creating new file" << std::endl;
+        //check if user wants to download database from server
+        if (prompt_y_n("Would you like to download a database from a server?", NULL))
+        {
+            std::cout << "Server hostname: ";
+            std::getline(std::cin, srvname);
 
-        std::cout << "New database password: ";
-        hideterm();
-        std::getline(std::cin,dbpass);
-        showterm();
-        std::cout << std::endl;
+            std::cout << "Server port: ";
+            std::getline(std::cin, srvport);
 
-        std::cout << "Server hostname: ";
-        std::getline(std::cin, srvname);
+            std::cout << "Server username: ";
+            std::getline(std::cin, srvuname);
 
-        std::cout << "Server port: ";
-        std::getline(std::cin, srvport);
+            std::cout << "Password: ";
+            hideterm();
+            std::getline(std::cin, dbpass);
+            showterm();
+
+            //download database
+            secretKey =  KLCrypto::sha256sum(dbpass);
+            data = "DOWNLOAD:" + srvuname + ":" + secretKey + "\n";
+            int n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
+            /*if (n != 0)
+             *  std::cout << "TLS_send error code: " << n << std::endl;*/
+        }
+        else //create new database
+        {
+            std::cout << "Creating new local database..." << std::endl;
+
+            std::cout << "New database password: ";
+            hideterm();
+            std::getline(std::cin, dbpass);
+            showterm();
+            std::cout << std::endl;
+
+            std::cout << "Server hostname: ";
+            std::getline(std::cin, srvname);
+
+            std::cout << "Server port: ";
+            std::getline(std::cin, srvport);
+
+            std::cout << "Server username: ";
+            std::getline(std::cin, srvuname);
+        }
 
         /*set JSON key:value pairs*/
         passdb["dbuser"]  = username;
         passdb["srvname"] = srvname;
         passdb["srvport"] = srvport;
+        passdb["srvuname"] = srvuname;
 
         /*generate secret key*/
         //passdb["secret"] = KLCrypto::genpwd(64);
@@ -550,12 +590,9 @@ int main()
             std::cout << HELP_TEXT << std::endl;
         else if (args[0] == "register" || args[0] == "upload" || args[0] == "download")
         {
-            std::string reqType;
-            std::string data;
-
             /*std::string secretKey = Json::writeString(builder,passdb["secret"]);;
               secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());*/
-            std::string secretKey = KLCrypto::sha256sum(dbpass);
+            secretKey = KLCrypto::sha256sum(dbpass);
             //DEBUG
             std::cout << secretKey << std::endl;
 
