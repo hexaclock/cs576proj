@@ -8,6 +8,8 @@ of specified length (or prompts user for password if length was 0 or not include
 \n\t'get [<service> <username>]':\tRetrieves the entry for \
 key: '<service>_<username>' from the database if they were provided,\
 else returns a list of all entries. Reports error message if no such key exists.\
+\n\t'clip <service> <username>:\tCopies the password for key: '<service>_<username>' \
+to the clipboard if the entry exists. Requires X window manager / xclip. \
 \n\t'edit <service> <username>':\tEdits an existing entry for key: \
 '<service>_<username>' with new values provided by user. Reports error message \
 if no such key exists.\
@@ -166,6 +168,30 @@ void get_entry(Json::Value *passdb, std::string request)
             print_entry(passdb, request);
         }
     }
+}
+
+/* pre: takes in a Json::Value* passdb and a std::string request
+   post: copies the pass for the request to the clipboard,
+         then overwrites clipboard when user is done
+*/
+void clip(Json::Value *passdb, std::string request)
+{
+  std::string pass;
+
+  if ((*passdb)["dbentry"].isMember(request))
+  {
+    pass = (*passdb)["dbentry"][request]["password"].asString();
+    pass = "echo -n \"" + pass + "\" | xclip -selection clipboard";
+    system((const char*)pass.c_str());
+
+    std::cout << "Password copied to clipboard. Press enter to overwrite clipboard.";
+    std::getline(std::cin, pass);
+    std::cin.sync();
+    pass = "echo -n \" \" | xclip -selection clipboard";
+    system((const char*)pass.c_str());
+  }
+  else
+    std::cout << "Entry doesn't exist!" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -383,6 +409,13 @@ int main()
             else
                 std::cout<<"usage: get [<service> <username>]"<<std::endl;
         }
+				else if (args[0] == "clip")
+				{
+					if (argcnt == 3)
+						clip(&passdb, (std::string)args[1] + "_" + (std::string)args[2]);
+					else
+						std::cout<<"usage: clip [<service> <username>]"<<std::endl;
+				}
         else if (args[0] == "delete")
         {
             if (argcnt == 3)
