@@ -516,12 +516,12 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
     if (argv[0] == "register")
     {
         reqType = "REGISTER";
-        data = reqType + ":" + username + ":" + secretKey + "\n";
+        data = reqType + ":" + srvuname + ":" + secretKey + "\n";
     }
     else if (argv[0] == "download")
     {
         reqType = "DOWNLOAD";
-        data = reqType + ":" + username + ":" + secretKey + "\n";
+        data = reqType + ":" + srvuname + ":" + secretKey + "\n";
     }
     else if (argv[0] == "upload")
     {
@@ -541,7 +541,7 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
 
         std::string db_b64((std::istreambuf_iterator<char>(passdb_file)), std::istreambuf_iterator<char>());
 
-        data = reqType + ":" + username + ":" + secretKey + ":" + db_b64 + "\n";
+        data = reqType + ":" + srvuname + ":" + secretKey + ":" + db_b64 + "\n";
         passdb_file.close();
         //DEBUG
         //std::cout << data << std::endl;
