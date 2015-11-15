@@ -17,6 +17,7 @@ if no such key exists.\
 '<service>_<username>'. Reports error message if no such key exists.\
 \n\t'save':\t\t\t\tSave a local copy of the database without uploading to server.\
 \n\t'register':\t\t\tAttempt to register with previously specified server.\
+\n\t'chpass':\t\t\tChange database password and update record on server.\
 \n\t'upload':\t\t\tSave database to disk and upload to server.\
 \n\t'download':\t\t\tDownload the database file stored on the server.\
 \n\t'quit':\t\t\t\tExits the program.\
