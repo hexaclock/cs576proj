@@ -119,6 +119,30 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
     return true;
 }
 
+bool chpass(WOLFSSL* ssl, std::string &data)
+{
+    char success = 0;
+    int ret = 0;
+    
+    if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
+    {
+        ret = wolfSSL_get_error(ssl, 0);
+        std::cout << "WolfSSL write error. Error: " << ret << std::endl;
+        return false;
+    }
+
+    if (wolfSSL_read(ssl, &success, sizeof(char)) < 0)
+    {
+        ret = wolfSSL_get_error(ssl, 0);
+        std::cout << "WolfSSL read error. Error: " << ret << std::endl;
+    }   
+    
+    if (success)
+        return true;
+    else
+        return false;    
+}
+
 int tls_send(std::string &hostname, int portnum,
              std::string &data, std::string &dbpath)
 {
@@ -163,7 +187,7 @@ int tls_send(std::string &hostname, int portnum,
 
     if (connect(sockfd,(struct sockaddr *)&srvaddr,sizeof(srvaddr)) < 0)
     {
-        std::cout<<"Failed to connect to server"<<std::endl;
+        std::cout<<std::endl<<"Failed to connect to server"<<std::endl;
         return -4;
     }
 
@@ -217,6 +241,10 @@ int tls_send(std::string &hostname, int portnum,
         {
             if ( (ret = regist(wssl, data)) )
                 std::cout << "Successfully registered with server" << std::endl;
+        }
+        else if (reqType == "CHPASS")
+        {
+            ret = chpass(wssl, data);
         }
 
         /*return 1 stands for failure of requests processing*/

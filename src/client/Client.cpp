@@ -474,6 +474,7 @@ void parse_chpass(int argc, std::vector<std::string> argv)
 {
     std::string newpass;
     std::string confirmnewpass;
+    int ret;
 
     if (checkpass(dbpass))
     {
@@ -487,13 +488,39 @@ void parse_chpass(int argc, std::vector<std::string> argv)
         showterm();
         if (newpass == confirmnewpass)
         {
-            dbpass = newpass;
-            if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
+            secretKey = KLCrypto::sha256sum(dbpass);
+            std::string newSecretKey = KLCrypto::sha256sum(newpass);
+            data = "CHPASS:" + srvuname + ":" + secretKey + ":" + newSecretKey + "\n";
+            //try to update pass on server
+            if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) == 0 )
             {
-                panic("[-] Failed to update user's password", 3);
+                //try to update db with newpass
+                if (!JsonParsing::writeJson(&passdb,dbpath,newpass))
+                {
+                    std::cout << std::endl << "Failed to update local password" << std::endl;
+                    std::cout << "Reverting change..." << std::endl;
+                    //revert!
+                    data = "CHPASS:" + srvuname + ":" + newSecretKey + ":" + secretKey + "\n";
+                    if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) == 0 )
+                        std::cout << "Reverted!" << std::endl;
+                    //this should hopefully never happen...
+                    else
+                        std::cout << "Failed to revert! Please contact your local sysadmin"
+                                  << std::endl
+                                  << "or you may face issues syncing with the server."
+                                  << std::endl;
+                }
+                else
+                    std::cout << std::endl << "Password updated successfully" << std::endl;
+                
             }
             else
-                std::cout << std::endl << "Password updated successfully" << std::endl;
+            {
+                std::cout << std::endl << "Failed to update password" << std::endl;
+                return;
+            }
+            dbpass = newpass;
+            secretKey = newSecretKey;
         }
         else
         {
