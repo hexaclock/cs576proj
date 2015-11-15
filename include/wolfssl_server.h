@@ -35,6 +35,13 @@
 /* C++ base64 */
 #include "base64.h"
 
+
+/*
+ *Server will not allow transfers greater
+ *than 2MB by default.
+*/
+#define MAX_DATA_SIZE 2000000
+
 /*
  *class for encrypting and decrypting JSON database file
  */

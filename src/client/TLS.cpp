@@ -4,47 +4,47 @@
 
 bool regist (WOLFSSL* ssl, std::string &data)
 {
-    char sendBuf[MAXDATASIZE], rcvBuf[MAXDATASIZE] = {0};
+    char rcvBuf[MAXDATASIZE] = {0};
     int ret = 0;
 
-    strcpy(sendBuf, data.c_str());
-    if (wolfSSL_write(ssl, sendBuf, strlen(sendBuf)) != (int)strlen(sendBuf))
+    //strcpy(sendBuf, data.c_str());
+    if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL write error. Error: " << ret << std::endl;
         return false;
     }
 
-    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE) < 0)
+    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE-1) < 0)
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL read error. Error: " << ret << std::endl;
     }
-    std::cout << "Received: " << rcvBuf << std::endl;
+    //std::cout << "Received: " << rcvBuf << std::endl;
 
     return true;
 }
 
 bool upload (WOLFSSL* ssl, std::string &data)
 {
-    char sendBuf[MAXDATASIZE], rcvBuf[MAXDATASIZE] = {0};
+    char rcvBuf[MAXDATASIZE] = {0};
     int ret = 0;
 
-    strcpy(sendBuf, data.c_str());
+    //strcpy(sendBuf, data.c_str());
 
-    if (wolfSSL_write(ssl, sendBuf, strlen(sendBuf)) != (int)strlen(sendBuf))
+    if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL write error. Error: " << ret << std::endl;
         return false;
     }
 
-    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE) < 0)
+    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE-1) < 0)
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL read error. Error: " << ret << std::endl;
     }
-    std::cout << "Received: " << rcvBuf << std::endl;
+    //std::cout << "Received: " << rcvBuf << std::endl;
 
     return true;
 }
@@ -55,7 +55,7 @@ bool upload (WOLFSSL* ssl, std::string &data)
  */
 bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
 {
-    char sendBuf[MAXDATASIZE], rcvBuf[MAXDATASIZE] = {0};
+    char rcvBuf[MAXDATASIZE] = {0};
     int ret;
     std::string username;
     std::string msg;
@@ -70,16 +70,16 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
 //  std::ofstream fout(dbpath + '/' + filename);
     std::ofstream fout(dbpath);
 
-    strcpy(sendBuf, data.c_str());
+    //strcpy(sendBuf, data.c_str());
 
-    if (wolfSSL_write(ssl, sendBuf, strlen(sendBuf)) != (int)strlen(sendBuf))
+    if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL write error. Error: " << ret << std::endl;
         return false;
     }
 
-    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE) < 0)
+    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE-1) < 0)
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL read error. Error: " << ret << std::endl;

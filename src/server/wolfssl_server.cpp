@@ -299,11 +299,14 @@ std::string get_cli_data(WOLFSSL *sslconn)
         if ( (bytes_read = wolfSSL_read(sslconn,tempbuf,sizeof(tempbuf)-2)) > 0 )
         {
             cli_data += std::string(tempbuf);
-            std::cout<<"[DEBUG] "<<cli_data<<std::endl;
             if (tempbuf[bytes_read-1] == '\n')
             {
                 //remove '\n' from string
                 cli_data.erase(cli_data.size()-1,1);
+                break;
+            }
+            if (cli_data.size() > MAX_DATA_SIZE)
+            {
                 break;
             }
         }
