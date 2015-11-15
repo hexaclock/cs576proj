@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -34,6 +35,13 @@
 #include "json/json.h"
 /* C++ base64 */
 #include "base64.h"
+
+
+/*
+ *Server will not allow transfers greater
+ *than 2MB by default.
+*/
+#define MAX_DATA_SIZE 2000000
 
 /*
  *class for encrypting and decrypting JSON database file

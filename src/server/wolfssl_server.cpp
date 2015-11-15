@@ -84,6 +84,46 @@ bool register_user(const std::string &user, const std::string &secret,
     return true;
 }
 
+bool change_user_pass(const std::string &user, const std::string newpass,
+                      const std::string &dbpath)
+{
+    Json::StyledWriter writer;
+    Json::Value root;
+    byte *newsalt = KLCrypto::getRandBytes(16);
+    std::string newhash = KLCrypto::pbkdf2hash(newpass,newsalt,16);
+
+    if (!read_user_db(&root,dbpath))
+    {
+        std::cout<<"[-] Could not parse user database"<<std::endl;
+        return false;
+    }
+    /* fail if user does not exist! */
+    if (!root["users"].isMember(user))
+    {
+        std::cout<<"[-] Failed to update password for "<<user
+                 <<" because they do not exist"<<std::endl;
+        return false;
+    }
+
+    if (newhash == "")
+    {
+        std::cout<<"[-] Failed to compute new password hash for user: "<<user
+                 <<std::endl;
+        return false;
+    }
+
+    root["users"][user]["secret"] = newhash;
+    root["users"][user]["salt"]   = base64_encode(newsalt, 16);
+
+    if (!write_user_db(&root,dbpath))
+    {
+        std::cout<<"[-] Failed to write to user database"<<std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 bool auth_user(const std::string &user, const std::string &secret,
                const std::string &dbpath)
 {
@@ -119,12 +159,10 @@ bool auth_user(const std::string &user, const std::string &secret,
 
         //DEBUG
         //std::cout<<"Stored secret: "<<storedsecret<<" "<< storedsecret.size() <<std::endl;
-        //std::cout<<"Supplied secret: "<<hash<<" "<< hash.size() <<std::endl;
-        
+        //std::cout<<"Supplied secret: "<<hash<<" "<< hash.size() <<std::endl;        
 
         if ( storedsecret == hash )
         {
-            //std::cout<<"Secrets match"<<std::endl;
             return true;
         }
         
@@ -185,6 +223,7 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
     std::string user;
     std::string secret;
     std::string b64dat;
+    char reply;
 
     while(std::getline(ss,part,':'))
     {
@@ -218,17 +257,24 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
         {
             if (!register_user(user,secret,dbpath))
             {
-                std::cout<<"[-] "<<"Failed to to register user: "<<user<<std::endl;
+                std::cout<<"[-] "<<"Failed to register user: "<<user<<std::endl;
+                reply = 0;
             }
             else
             {
                 std::cout<<"[+] "<<"Successfully registered user: "<<user<<std::endl;
+                reply = 1;
             }
         }
         else
         {
             std::cout<<"[-] Client sent an invalid command"<<std::endl;
         }
+
+        if (wolfSSL_write(sslconn, &reply, sizeof(char)) != sizeof(char))
+            std::cout<< "[-] " << "Failed to notify client of registration status"
+                     << std::endl;
+
         return;
     }
 
@@ -275,6 +321,34 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
         }
     }
 
+    else if (cmd == "CHPASS")
+    {
+        //CHPASS:user:curpass:newpass\n
+        if (cmdparts.size() == 4)
+        {
+            //it isn't actually b64-encoded, it's hex..
+            std::string newpass = b64dat;
+            if (!change_user_pass(user,newpass,dbpath))
+            {
+                reply = 0;
+                std::cout<<"[-] Failed to change "<<user<<"'s"<<" password"<<std::endl;
+            }
+            else
+            {
+                reply = 1;
+                std::cout<<"[+] Successfully changed "<<user<<"'s"<<" password"<<std::endl;
+            }
+        }
+        else
+        {
+            std::cout<<"[-] Client sent an invalid command"<<std::endl;
+        }
+
+        if (wolfSSL_write(sslconn, &reply, sizeof(char)) != sizeof(char))
+            std::cout<< "[-] " << "Failed to notify client of chpass status"
+                     << std::endl;
+    }
+
     /* client sent invalid command */
     else
     {
@@ -291,19 +365,20 @@ std::string get_cli_data(WOLFSSL *sslconn)
     char tempbuf[4096];
     std::string cli_data;
 
-    //std::cout<<"started get_cli_data function"<<std::endl;
-
     while(1)
     {
         memset(tempbuf,0,sizeof(tempbuf));
         if ( (bytes_read = wolfSSL_read(sslconn,tempbuf,sizeof(tempbuf)-2)) > 0 )
         {
             cli_data += std::string(tempbuf);
-            std::cout<<"[DEBUG] "<<cli_data<<std::endl;
             if (tempbuf[bytes_read-1] == '\n')
             {
                 //remove '\n' from string
                 cli_data.erase(cli_data.size()-1,1);
+                break;
+            }
+            if (cli_data.size() > MAX_DATA_SIZE)
+            {
                 break;
             }
         }
@@ -431,6 +506,7 @@ int main(int argc, char **argv)
         {
             /* parent */
             close(clisocketfd);
+            waitpid(pid, 0, 0);
             continue;
         }
         else

@@ -8,7 +8,7 @@ RM       = rm -f
 IPATH    = ../../include
 LDLIBS   += -l:libwolfssl.so.1.0.0
 LDFLAGS  += -L../../lib -Wl,-rpath -Wl,../../lib
-CXXFLAGS += -I$(IPATH) -ggdb -Wall -Wextra -pedantic -std=c++11
+CXXFLAGS += -I$(IPATH) -g -Wall -Wextra -Wno-unused-parameter -pedantic -std=c++11
 
 all: $(OBJ)
 	$(CXX) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $(PRG)
