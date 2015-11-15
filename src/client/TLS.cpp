@@ -197,7 +197,7 @@ int tls_send(std::string &hostname, int portnum,
         return -5;
     }
 
-    if (wolfSSL_CTX_load_verify_locations(wsctx, "../../include/proxy_cert.pem", 0) != SSL_SUCCESS)
+    if (wolfSSL_CTX_load_verify_locations(wsctx, "../../include/server_cert.pem", 0) != SSL_SUCCESS)
     {
         std::cout<<"Error loading server's certificate for verification"<<std::endl;
         return EXIT_FAILURE;
