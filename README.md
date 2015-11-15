@@ -18,6 +18,16 @@ Our password manager for CS576.
 
 `delete <service> <username>`: Deletes an existing entry for key: `<service>_<username>`. Reports error message if no such key exists.
 
+`save`:         Save a local copy of the database without uploading to server.
+
+`register`:     Attempt to register with previously specified server.
+
+`chpass`:       Attempt to change database password and update record on server.
+
+`upload`:       Save database to disk and upload to server.
+
+`download`:     Download the database file stored on the server.
+
 `quit`: Exits the program.
 
 `help`: Displays this list of commands.
@@ -31,7 +41,6 @@ The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylock
    "srvhost" : "server_hostname",
    "srvport" : "server_port",
    "srvuname": "server_username",
-   "secret"  : "random_shared_secret",
    "dbentry" : {
       "service_username" : {
          "notes" : "notes go here",
