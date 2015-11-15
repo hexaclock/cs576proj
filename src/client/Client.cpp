@@ -549,7 +549,6 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
     {
         reqType = "REGISTER";
         data = reqType + ":" + srvuname + ":" + secretKey + "\n";
-
         if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
             std::cout<<"Failed to register with server. User may already exist."<<std::endl;
     }
@@ -557,7 +556,6 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
     {
         reqType = "DOWNLOAD";
         data = reqType + ":" + srvuname + ":" + secretKey + "\n";
-
         if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
             std::cout<<"Failed to download database"<<std::endl;
     }
