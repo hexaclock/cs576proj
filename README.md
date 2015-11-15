@@ -3,6 +3,7 @@ Our password manager for CS576.
 
 ##Usage
 `./client` This starts an interactive prompt.
+`./server <port #> <certfile> <privkey> <userdb>` This starts the server.
 
 **Commands:**
 
