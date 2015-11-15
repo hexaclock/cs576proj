@@ -40,3 +40,7 @@
 doc/*.aux
 doc/*.log
 doc/*.pdf
+
+# Testing files
+src/server/userdb.json
+*.db

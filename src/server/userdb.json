@@ -3,9 +3,6 @@
       "anotheruser" : {
          "secret" : "secret2"
       },
-      "danv" : {
-         "secret" : "testsecret"
-      },
       "dvinak" : {
          "secret" : "mysecretkey"
       },
