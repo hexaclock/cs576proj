@@ -44,3 +44,4 @@ doc/*.pdf
 # Testing files
 src/server/userdb.json
 *.db
+

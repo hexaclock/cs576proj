@@ -15,6 +15,10 @@ to the clipboard if the entry exists. Requires X window manager / xclip. \
 if no such key exists.\
 \n\t'delete <service> <username>':\tDeletes an existing entry for key: \
 '<service>_<username>'. Reports error message if no such key exists.\
+\n\t'save':\t\t\t\tSave a local copy of the database without uploading to server.\
+\n\t'register':\t\t\tAttempt to register with previously specified server.\
+\n\t'upload':\t\t\tSave database to disk and upload to server.\
+\n\t'download':\t\t\tDownload the database file stored on the server.\
 \n\t'quit':\t\t\t\tExits the program.\
 \n\t'help':\t\t\t\tDisplays this list of commands.";
 
@@ -509,19 +513,26 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
 {
     /*std::string secretKey = Json::writeString(builder,passdb["secret"]);;
       secretKey.erase(remove(secretKey.begin(), secretKey.end(), '\"'), secretKey.end());*/
+    int ret;
     secretKey = KLCrypto::sha256sum(dbpass);
     //DEBUG
-    std::cout << secretKey << std::endl;
+    //std::cout << secretKey << std::endl;
 
     if (argv[0] == "register")
     {
         reqType = "REGISTER";
         data = reqType + ":" + srvuname + ":" + secretKey + "\n";
+
+        if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
+            std::cout<<"Failed to register with server. User may already exist."<<std::endl;
     }
     else if (argv[0] == "download")
     {
         reqType = "DOWNLOAD";
         data = reqType + ":" + srvuname + ":" + secretKey + "\n";
+
+        if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
+            std::cout<<"Failed to download database"<<std::endl;
     }
     else if (argv[0] == "upload")
     {
@@ -534,7 +545,9 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
         Json::Reader reader;
         std::ifstream passdb_file;
 
-        std::cout << dbpath << std::endl;
+        //DEBUG
+        //std::cout << dbpath << std::endl;
+
         passdb_file.open(dbpath);
         if (!passdb_file.is_open())
             panic("Failed to open database file. TLS send failed!", -1);
@@ -543,13 +556,18 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
 
         data = reqType + ":" + srvuname + ":" + secretKey + ":" + db_b64 + "\n";
         passdb_file.close();
-        //DEBUG
-        //std::cout << data << std::endl;
-    }
 
-    int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
-    /*if (ret != 0)
-      std::cout << "TLS_send error code: " << ret << std::endl;*/
+        if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
+            std::cout<<"Failed to upload database to server"<<std::endl;
+    }
+}
+
+void parse_save(int argc, std::vector<std::string> argv)
+{
+    if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
+        std::cout << "Failed to save local database" << std::endl;
+    else
+        std::cout << "Successfuly saved local database" << std::endl;
 }
 
 /* pre: none
@@ -603,6 +621,8 @@ bool parse_command(int argc, std::vector<std::string> argv)
         parse_gen(argc, argv);
     else if (argv[0] == "register" || argv[0] == "upload" || argv[0] == "download")
         parse_tls_send(argc, argv);
+    else if (argv[0] == "save")
+        parse_save(argc, argv);
     else if (argv[0] == "quit")
         return false;
     else if (argv[0] == "help")
@@ -613,6 +633,32 @@ bool parse_command(int argc, std::vector<std::string> argv)
     return true;
 }
 
+bool local_db_exists(const std::string &kldir, const std::string &dbpath)
+{
+    bool ret = false;
+    int result;
+
+    //try to create a new directory
+    if ( (result = mkdir(kldir.c_str(),0700)) == -1 )
+    {
+        //something is wrong if we can't create a directory
+        if (errno != EEXIST)
+        {
+            panic("Failed to create .keylocker directory in home directory",-2);
+        }
+        //we know the directory exists now, but does the db file?
+        else
+        {
+            struct stat buf;
+            if ( stat(dbpath.c_str(), &buf) == 0 )
+                ret = true;
+            else
+                ret = false;
+        }
+    }
+    return ret;
+}
+
 /* pre: takes in int argc and char** argv command line arguments
  * post: runs the client side keylocker program
  * returns: 0 on success, something else on failure
@@ -620,7 +666,7 @@ bool parse_command(int argc, std::vector<std::string> argv)
 int main()
 {
     char *tmp;
-    int result;
+    //int result;
 
     std::vector<std::string> args; //the vector for the command the user types
     bool newfile; //flag to designate whether or not a new file has been created
@@ -643,17 +689,13 @@ int main()
 
     dbname = username + "_keylocker" + ".db";
     kldir  = homepath + "/" + ".keylocker";
-    if ( (result = mkdir(kldir.c_str(),0700)) == -1 )
-    {
-        if (errno != EEXIST)
-            panic("Failed to create .keylocker directory in home directory",-2);
-    }
-    else
-        newfile = true;
     dbpath = kldir + "/" + dbname;
+
+    newfile = !local_db_exists(kldir,dbpath);
 
     if (newfile)
     {
+        int n;
         std::cout << "No local password database was found..." << std::endl;
 
         //check if user wants to download database from server
@@ -677,9 +719,13 @@ int main()
             //download database
             secretKey =  KLCrypto::sha256sum(dbpass);
             data = "DOWNLOAD:" + srvuname + ":" + secretKey + "\n";
-            int n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
-            /*if (n != 0)
-             *  std::cout << "TLS_send error code: " << n << std::endl;*/
+            n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
+            if (n != 0)
+                std::cout << "Failed to download database from server" << std::endl;
+
+            //if we successfully downloaded database, try to load it//
+            else if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
+                std::cout << "Failed to open downloaded database" << std::endl;
         }
         else //create new database
         {
@@ -699,6 +745,17 @@ int main()
 
             std::cout << "Server username: ";
             std::getline(std::cin, srvuname);
+
+            secretKey = KLCrypto::sha256sum(dbpass);
+
+            //ask user if they want to register with the server
+            if (prompt_y_n("Would you like to register with this server?", ""))
+            {
+                data = "REGISTER:" + srvuname + ":" + secretKey + "\n";
+                n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
+                if (n != 0)
+                    std::cout << "Failed to register with server. User may already exist." << std::endl;
+            }
         }
 
         /*set JSON key:value pairs*/
@@ -706,9 +763,6 @@ int main()
         passdb["srvname"] = srvname;
         passdb["srvport"] = srvport;
         passdb["srvuname"] = srvuname;
-
-        /*generate secret key*/
-        //passdb["secret"] = KLCrypto::genpwd(64);
     }
     else
     {
@@ -736,6 +790,10 @@ int main()
     srvport = Json::writeString(builder,passdb["srvport"]);
     srvport.erase(remove(srvport.begin(), srvport.end(), '\"'), srvport.end());
 
+    /*set server username var from database, strip quotes*/
+    srvuname = Json::writeString(builder,passdb["srvuname"]);
+    srvuname.erase(remove(srvuname.begin(), srvuname.end(), '\"'), srvuname.end());
+
     while(1) /* main loop */
     {
         prompt();
@@ -744,9 +802,9 @@ int main()
             break;
         std::cout << std::endl;
     }
-
-    if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
-        panic("[-] Failed to write to user's password database file!", 3);
+    if (prompt_y_n("Would you like to save before exiting?", ""))
+        if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
+            panic("[-] Failed to save the password database file!", 3);
 
     return 0;
 }

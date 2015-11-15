@@ -185,6 +185,7 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
     std::string user;
     std::string secret;
     std::string b64dat;
+    char reply;
 
     while(std::getline(ss,part,':'))
     {
@@ -218,17 +219,24 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
         {
             if (!register_user(user,secret,dbpath))
             {
-                std::cout<<"[-] "<<"Failed to to register user: "<<user<<std::endl;
+                std::cout<<"[-] "<<"Failed to register user: "<<user<<std::endl;
+                reply = 0;
             }
             else
             {
                 std::cout<<"[+] "<<"Successfully registered user: "<<user<<std::endl;
+                reply = 1;
             }
         }
         else
         {
             std::cout<<"[-] Client sent an invalid command"<<std::endl;
         }
+
+        if (wolfSSL_write(sslconn, &reply, sizeof(char)) != sizeof(char))
+            std::cout<< "[-] " << "Failed to notify client of registration status"
+                     << std::endl;
+
         return;
     }
 
@@ -290,8 +298,6 @@ std::string get_cli_data(WOLFSSL *sslconn)
     int bytes_read;
     char tempbuf[4096];
     std::string cli_data;
-
-    //std::cout<<"started get_cli_data function"<<std::endl;
 
     while(1)
     {
