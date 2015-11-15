@@ -30,6 +30,7 @@ The encrypted database is a JSON file, stored as `$HOME/.keylocker/$USER_keylock
    "dbuser"  : "username",
    "srvhost" : "server_hostname",
    "srvport" : "server_port",
+   "srvuname": "server_username",
    "secret"  : "random_shared_secret",
    "dbentry" : {
       "service_username" : {
