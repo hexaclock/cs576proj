@@ -1,6 +1,8 @@
 #include "network.h"
 #include "keylocker.h"
 
+void parse_tls_send(int argc, std::vector<std::string> argv);
+
 std::string HELP_TEXT = "Commands can be any of the following:\
 \n\t'add [<length>]':\t\tAdds a new entry to the database with a random password \
 of specified length (or prompts user for password if length was 0 or not included).\
@@ -522,6 +524,10 @@ void parse_chpass(int argc, std::vector<std::string> argv)
             }
             dbpass = newpass;
             secretKey = newSecretKey;
+            //send re-encrypted database to server if everything went well
+            std::vector<std::string> passargs;
+            passargs.push_back("upload");
+            parse_tls_send(3, passargs);
         }
         else
         {
