@@ -691,6 +691,38 @@ bool local_db_exists(const std::string &kldir, const std::string &dbpath)
     return ret;
 }
 
+bool validate_portnum(const std::string &portstr)
+{
+    int portnum = atoi(portstr.c_str());
+
+    if (portstr.size() > 5)
+        return false;
+
+    for (int i=0; i<(int)portstr.size(); ++i)
+    {
+        if (!isdigit(portstr[i]))
+            return false;
+    }
+
+    if (portnum < 1 || portnum > 65535)
+        return false;
+    return true;
+}
+
+bool validate_username(const std::string &uname)
+{
+    if (uname.size() > 64)
+        return false;
+
+    for (int i=0; i<(int)uname.size(); ++i)
+    {
+        if (!isalnum(uname[i]) && uname[i] != '-'
+            && uname[i] != '_')
+            return false;
+    }
+    return true;
+}
+
 /* pre: takes in int argc and char** argv command line arguments
  * post: runs the client side keylocker program
  * returns: 0 on success, something else on failure
@@ -736,11 +768,23 @@ int main()
             std::cout << "Server hostname: ";
             std::getline(std::cin, srvname);
 
-            std::cout << "Server port: ";
-            std::getline(std::cin, srvport);
-
-            std::cout << "Server username: ";
-            std::getline(std::cin, srvuname);
+            do
+            {
+                std::cout << "Server port: ";
+                std::getline(std::cin, srvport);
+                if (!validate_portnum(srvport))
+                    std::cout << "Invalid port"
+                              << std::endl;
+            } while (!validate_portnum(srvport));
+            
+            do
+            {
+                std::cout << "Server username: ";
+                std::getline(std::cin, srvuname);
+                if (!validate_username(srvuname))
+                    std::cout << "Username must be alphanumeric"
+                              << std::endl;
+            } while (!validate_username(srvuname));
 
             std::cout << "Password: ";
             hideterm();
@@ -772,11 +816,23 @@ int main()
             std::cout << "Server hostname: ";
             std::getline(std::cin, srvname);
 
-            std::cout << "Server port: ";
-            std::getline(std::cin, srvport);
+            do
+            {
+                std::cout << "Server port: ";
+                std::getline(std::cin, srvport);
+                if (!validate_portnum(srvport))
+                    std::cout << "Invalid port"
+                              << std::endl;
+            } while (!validate_portnum(srvport));
 
-            std::cout << "Server username: ";
-            std::getline(std::cin, srvuname);
+            do
+            {
+                std::cout << "Server username: ";
+                std::getline(std::cin, srvuname);
+                if (!validate_username(srvuname))
+                    std::cout << "Username must be alphanumeric"
+                              << std::endl;
+            } while (!validate_username(srvuname));
 
             secretKey = KLCrypto::sha256sum(dbpass);
 
@@ -821,10 +877,20 @@ int main()
     /* note srvport is a string */
     srvport = Json::writeString(builder,passdb["srvport"]);
     srvport.erase(remove(srvport.begin(), srvport.end(), '\"'), srvport.end());
+    if (!validate_portnum(srvport))
+    {
+        std::cout << "Invalid server port in database file!" << std::endl;
+        exit(3);
+    }
 
     /*set server username var from database, strip quotes*/
     srvuname = Json::writeString(builder,passdb["srvuname"]);
     srvuname.erase(remove(srvuname.begin(), srvuname.end(), '\"'), srvuname.end());
+    if (!validate_username(srvuname))
+    {
+        std::cout << "Invalid server username in database file!" << std::endl;
+        exit(3);
+    }
 
     while(1) /* main loop */
     {
