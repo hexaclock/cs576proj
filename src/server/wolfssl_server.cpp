@@ -409,6 +409,16 @@ WOLFSSL *start_ssl(WOLFSSL_CTX *wsslctx, socklen_t clisocketfd, struct sockaddr_
     return wssl;    
 }
 
+void sighandler(int sig)
+{
+    //exit child
+    if (sig == SIGALRM)
+    {
+        std::cout << "[-] Timeout exceeded" << std::endl;
+        exit(2);
+    }
+}
+
 int main(int argc, char **argv)
 {
     struct sockaddr_in srvaddr, cliaddr;
@@ -513,15 +523,18 @@ int main(int argc, char **argv)
         {
             /* child */
             close(socketfd);
+            //15 second timeout
+            signal(SIGALRM,sighandler);
+            alarm(15);
             cliipaddr = std::string(inet_ntoa(cliaddr.sin_addr));
             std::cout<<"[+] Client connected from IP address: "<<cliipaddr
                      <<std::endl;
             sslconn = start_ssl(wsslctx,clisocketfd,cliaddr);
-            //std::cout<<"started ssl"<<std::endl;
             data = get_cli_data(sslconn);
-            //std::cout<<"got data: "<<data<<std::endl;
+
+            //shut alarm off
+            alarm(0);
             process_data(data,dbpath,sslconn);
-            //std::cout<<"processed data"<<std::endl;
 
             close(clisocketfd);
             break;

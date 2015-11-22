@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
 #include <linux/limits.h>
 
 /* C network stuff */
