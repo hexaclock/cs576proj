@@ -1,5 +1,5 @@
 CXX      = clang++
-PRG      = client
+PRG      = klclient
 SRC      = Client.cpp JsonParsing.cpp TLS.cpp \
 	   ../shared/Crypto.cpp ../shared/jsoncpp.cpp ../shared/base64.cpp
 OBJ      = $(SRC:.cpp=.o)
