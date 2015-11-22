@@ -44,7 +44,7 @@ bool read_user_db(Json::Value *root, const std::string &dbpath)
 bool register_user(const std::string &user, const std::string &secret,
                    const std::string &dbpath)
 {
-    Json::StyledWriter writer;
+    //Json::StyledWriter writer;
     Json::Value root;
     byte *salt;
     std::string hash;
@@ -106,7 +106,7 @@ bool register_user(const std::string &user, const std::string &secret,
 bool change_user_pass(const std::string &user, const std::string newpass,
                       const std::string &dbpath)
 {
-    Json::StyledWriter writer;
+    //Json::StyledWriter writer;
     Json::Value root;
     byte *newsalt = KLCrypto::getRandBytes(16);
     std::string newhash = KLCrypto::pbkdf2hash(newpass,newsalt,16);
@@ -146,7 +146,7 @@ bool change_user_pass(const std::string &user, const std::string newpass,
 bool auth_user(const std::string &user, const std::string &secret,
                const std::string &dbpath)
 {
-    Json::Reader reader;
+    //Json::Reader reader;
     Json::Value root;
 
 
