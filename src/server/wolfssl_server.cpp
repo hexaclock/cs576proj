@@ -44,7 +44,7 @@ bool read_user_db(Json::Value *root, const std::string &dbpath)
 bool register_user(const std::string &user, const std::string &secret,
                    const std::string &dbpath)
 {
-    Json::StyledWriter writer;
+    //Json::StyledWriter writer;
     Json::Value root;
     byte *salt;
     std::string hash;
@@ -54,6 +54,25 @@ bool register_user(const std::string &user, const std::string &secret,
     {
         std::cout<<"[-] Could not parse user database"<<std::endl;
         return false;
+    }
+
+    //client needs to pick a shorter username
+    if (user.size() > 64)
+    {
+        std::cout<<"[-] Failed to register "<<user
+                 <<" because their username is >64 characters."<<std::endl;
+        return false;
+    }
+
+    for (int i=0; i<user.size(); ++i)
+    {
+        //prevent arbitrary file read/write with "../" in username
+        if (!isalnum(user[i]) && user[i] != '-' && user[i] != '_')
+        {
+            std::cout<<"[-] Failed to register "<<user
+                     <<" because the username is not valid."<<std::endl;
+            return false;
+        }
     }
 
     /* fail if user already exists! */
@@ -87,7 +106,7 @@ bool register_user(const std::string &user, const std::string &secret,
 bool change_user_pass(const std::string &user, const std::string newpass,
                       const std::string &dbpath)
 {
-    Json::StyledWriter writer;
+    //Json::StyledWriter writer;
     Json::Value root;
     byte *newsalt = KLCrypto::getRandBytes(16);
     std::string newhash = KLCrypto::pbkdf2hash(newpass,newsalt,16);
@@ -127,7 +146,7 @@ bool change_user_pass(const std::string &user, const std::string newpass,
 bool auth_user(const std::string &user, const std::string &secret,
                const std::string &dbpath)
 {
-    Json::Reader reader;
+    //Json::Reader reader;
     Json::Value root;
 
 
@@ -409,6 +428,16 @@ WOLFSSL *start_ssl(WOLFSSL_CTX *wsslctx, socklen_t clisocketfd, struct sockaddr_
     return wssl;    
 }
 
+void sighandler(int sig)
+{
+    //exit child
+    if (sig == SIGALRM)
+    {
+        std::cout << "[-] Timeout exceeded" << std::endl;
+        exit(2);
+    }
+}
+
 int main(int argc, char **argv)
 {
     struct sockaddr_in srvaddr, cliaddr;
@@ -513,15 +542,18 @@ int main(int argc, char **argv)
         {
             /* child */
             close(socketfd);
+            //15 second timeout
+            signal(SIGALRM,sighandler);
+            alarm(15);
             cliipaddr = std::string(inet_ntoa(cliaddr.sin_addr));
             std::cout<<"[+] Client connected from IP address: "<<cliipaddr
                      <<std::endl;
             sslconn = start_ssl(wsslctx,clisocketfd,cliaddr);
-            //std::cout<<"started ssl"<<std::endl;
             data = get_cli_data(sslconn);
-            //std::cout<<"got data: "<<data<<std::endl;
+
+            //shut alarm off
+            alarm(0);
             process_data(data,dbpath,sslconn);
-            //std::cout<<"processed data"<<std::endl;
 
             close(clisocketfd);
             break;
