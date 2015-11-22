@@ -56,6 +56,25 @@ bool register_user(const std::string &user, const std::string &secret,
         return false;
     }
 
+    //client needs to pick a shorter username
+    if (user.size() > 64)
+    {
+        std::cout<<"[-] Failed to register "<<user
+                 <<" because their username is >64 characters."<<std::endl;
+        return false;
+    }
+
+    for (int i=0; i<user.size(); ++i)
+    {
+        //prevent arbitrary file read/write with "../" in username
+        if (!isalnum(user[i]) && user[i] != '-' && user[i] != '_')
+        {
+            std::cout<<"[-] Failed to register "<<user
+                     <<" because the username is not valid."<<std::endl;
+            return false;
+        }
+    }
+
     /* fail if user already exists! */
     if (root["users"].isMember(user))
     {
