@@ -306,15 +306,26 @@ void clip(Json::Value *passdb, std::string request)
 {
     std::string pass;
 
+    // check if xclip exists
+    if (access("/usr/bin/xclip", F_OK))
+    {
+        std::cout << "Please install xclip in order to use this feature"
+                  << std::endl;
+        return;
+    }
+
     if ((*passdb)["dbentry"].isMember(request))
     {
         pass = (*passdb)["dbentry"][request]["password"].asString();
         pass = "echo -n \"" + pass + "\" | xclip -selection clipboard";
         system((const char*)pass.c_str());
 
-        std::cout << "Password copied to clipboard. Press enter to overwrite clipboard.";
+        std::cout << "Password copied to clipboard. "
+                  << std::endl
+                  << "Press enter to overwrite clipboard."
+                  << std::endl;
+        
         std::getline(std::cin, pass);
-        std::cin.sync();
         pass = "echo -n \" \" | xclip -selection clipboard";
         system((const char*)pass.c_str());
     }
@@ -655,7 +666,7 @@ bool parse_command(int argc, std::vector<std::string> argv)
         parse_tls_send(argc, argv);
     else if (argv[0] == "save")
         parse_save(argc, argv);
-    else if (argv[0] == "quit")
+    else if (argv[0] == "quit" || argv[0] == "exit" || argv[0] == "q")
         return false;
     else if (argv[0] == "help")
         std::cout << HELP_TEXT << std::endl;
