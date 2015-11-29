@@ -60,5 +60,6 @@ public:
                                   int saltlen);
 };
 
+bool prompt_y_n(std::string question, std::string ans_default);
 
 #endif

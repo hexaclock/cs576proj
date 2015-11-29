@@ -456,16 +456,64 @@ int main(int argc, char **argv)
     clilen = sizeof(cliaddr);
     wolfSSL_Init();
 
-    if (argc < 5)
+    if (argc == 4)
     {
-        std::cout<<"Usage: "<<argv[0]<<" <port #> <certfile> <privkey> <userdb>"<<std::endl;
+        if (prompt_y_n("Create new user database?", ""))
+        {
+            do
+            {
+                std::cout << "Please specify a filename for the new database: ";
+                std::getline(std::cin, dbpath);
+                
+                if (!access(dbpath.c_str(), F_OK))
+                {
+                    if (prompt_y_n("File already exists, overwrite?", ""))
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            } while (true);
+                
+            std::string jsondat = "{ \"users\" : { } }";
+            std::ofstream outputfile;
+            outputfile.open(dbpath);
+         
+            if (outputfile.is_open())
+            {
+                outputfile << jsondat;
+                outputfile.close();
+                std::cout << "Created new database file!"
+                          << std::endl;
+            }
+            else
+            {
+                std::cout << "Failed to create new database file!"
+                          << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "Ok, please specify an existing user database" << std::endl;
+            return -1;
+        }
+    }
+
+    else if (argc < 5)
+    {
+        std::cout<<"Usage: "<<argv[0]<<" <port #> <certfile> <privkey> [userdb]"<<std::endl;
+        std::cout<<"If [userdb] is unspecified, we will create a new one"<<std::endl;
         return 1;
     }
 
     portnum  = atoi(argv[1]);
     certpath = argv[2];
     privpath = argv[3];
-    dbpath   = std::string(argv[4]);
+    if (argc == 5)
+        dbpath = std::string(argv[4]);
 
     if (portnum < 1 || portnum > 65535)
     {
