@@ -8,7 +8,7 @@ RM       = rm -f
 IPATH    = ../../include
 LDLIBS   += -l:libwolfssl.so.1.0.0
 LDFLAGS  += -L../../lib -Wl,-rpath -Wl,../../lib
-CXXFLAGS += -I$(IPATH) -g -O2 -Wall -pedantic -std=c++11
+CXXFLAGS += -I$(IPATH) -g -O2 -Wall -pedantic -std=c++11 -fstack-protector-all -fPIE
 #LDFLAGS  += -L../../openssl/ -Wl,--no-as-needed
 #LDLIBS   += -ldl -lssl -lcrypto
 
