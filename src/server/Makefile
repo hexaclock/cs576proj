@@ -1,6 +1,7 @@
 CXX      = clang++
 PRG      = klserver
-SRC      = wolfssl_server.cpp ../shared/jsoncpp.cpp ../shared/base64.cpp ../shared/Crypto.cpp
+SRC      = wolfssl_server.cpp ../shared/jsoncpp.cpp ../shared/base64.cpp ../shared/Crypto.cpp \
+	   ../shared/Util.cpp
 OBJ      = $(SRC:.cpp=.o)
 RM       = rm -f
 #OPENSSL  = /usr/include/openssl

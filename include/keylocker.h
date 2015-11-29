@@ -82,5 +82,6 @@ public:
 
 int tls_send(std::string &hostname, int portnum,
              std::string &data, std::string &dbpath);
+bool prompt_y_n(std::string question, std::string ans_default);
 
 #endif
