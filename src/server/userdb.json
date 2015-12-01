@@ -1,8 +1,5 @@
 {
    "users" : {
-      "anotheruser" : {
-         "secret" : "secret2"
-      },
       "danv" : {
          "salt" : "j588+ycAz4Ix9LKQ3GOzqQ==",
          "secret" : "14QT7Tj/d3yqhKKdJ/1q8Yr8zfOb5RAQDV0NQOKOzbQ="
@@ -15,15 +12,14 @@
          "salt" : "p+UzULxzhj97SKWTKh8FeA==",
          "secret" : "TlYZzOQ8tHgaQ2DnZKXsv+PutwmqxK8NFFFRMy9gOQ8="
       },
-      "dvinak" : {
-         "secret" : "mysecretkey"
-      },
       "dvinakov" : {
          "salt" : "MUlYrErMIwROL/M8WOQIwQ==",
          "secret" : "knCxZ5XKdvdyZLo/o4aH3lJjvfFAgkIHHMSA87nXoME="
       },
-      "newuser" : {
-         "secret" : "secretz"
+      "somenewuser" : {
+         "loginattempts" : 0,
+         "salt" : "G//XulBif3pIetab76eEWQ==",
+         "secret" : "EYzTHghZg391qFNz56szSPJHFtoflKyGXd0nrZzsVtw="
       }
    }
 }

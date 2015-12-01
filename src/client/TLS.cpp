@@ -68,8 +68,6 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
     std::string srvresponse;
     std::string b64dat;
 
-    /*parse the data for file update*/
-    std::ofstream fout(dbpath);
 
     //strcpy(sendBuf, data.c_str());
 
@@ -105,6 +103,10 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
         return false;
     }
 
+
+    /*parse the data for file update*/
+    std::ofstream fout(dbpath);
+
     if (!fout.is_open())
     {
         std::cout << "Failed to open "<< dbpath << " for writing"
@@ -112,7 +114,7 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
 
         return false;
     }
-
+    
     fout << b64dat;
     fout.close();
 

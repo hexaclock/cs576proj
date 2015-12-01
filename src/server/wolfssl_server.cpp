@@ -148,7 +148,10 @@ bool auth_user(const std::string &user, const std::string &secret,
 {
     //Json::Reader reader;
     Json::Value root;
-
+    Json::Value val;
+    Json::StreamWriterBuilder builder;
+    std::string tmp = "";
+    int loginattempts = 0;
 
     if (!read_user_db(&root,dbpath))
     {
@@ -159,8 +162,19 @@ bool auth_user(const std::string &user, const std::string &secret,
     /* check if user exists */
     if (root["users"].isMember(user))
     {
-        Json::Value val;
-        Json::StreamWriterBuilder builder;
+        /* make sure user is not locked out */
+        if (root["users"][user].isMember("loginattempts"))
+        {
+            val = root["users"][user]["loginattempts"];
+            tmp = Json::writeString(builder,val);
+            loginattempts = atoi(tmp.c_str());
+
+            if (loginattempts > 10)
+            {
+                std::cout<<"[-] "<<user<<" is locked out"<<std::endl;
+                return false;
+            }
+        }
         std::string storedsecret;
         std::string storedsalt;
         const byte *salt_bytes;
@@ -297,15 +311,52 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
         return;
     }
 
+    bool authsuccess = auth_user(user,secret,dbpath);
+    Json::Value root;
+    Json::Value val;
+    Json::StreamWriterBuilder builder;
+    std::string tmp = "";
+    int loginattempts = 0;
+
+    if (!read_user_db(&root,dbpath))
+        return;
+        
     /* authenticate user before any command processing */
-    if (!auth_user(user,secret,dbpath))
+    if (!authsuccess)
     {
         std::cout<<"[-] "<<user<<" failed to authenticate"<<std::endl;
+
+        if (root["users"].isMember(user))
+        {
+            if (root["users"][user].isMember("loginattempts"))
+            {
+                val = root["users"][user]["loginattempts"];
+                tmp = Json::writeString(builder,val);
+                loginattempts = atoi(tmp.c_str());
+                //DEBUG
+                //std::cout << tmp << std::endl;
+                //std::cout << loginattempts << std::endl;
+            }
+
+            loginattempts += 1;
+
+            root["users"][user]["loginattempts"] = loginattempts;
+
+            if (!write_user_db(&root, dbpath))
+                return;
+        }
+
         return;
     }
     else
     {
-        std::cout<<"[+] "<<user<<" authenticated successfully"<<std::endl;
+        if (root["users"].isMember(user))
+            root["users"][user]["loginattempts"] = 0;
+
+        if (write_user_db(&root, dbpath))
+            std::cout<<"[+] "<<user<<" authenticated successfully"<<std::endl;
+        else
+            std::cout << "[-] Failed to write to user database!" << std::endl;
     }
 
     /* client wishes to upload their database */

@@ -749,7 +749,11 @@ int main()
             data = "DOWNLOAD:" + srvuname + ":" + secretKey + "\n";
             n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
             if (n != 0)
-                std::cout << "Failed to download database from server" << std::endl;
+            {
+                std::cout << "Failed to download database from server" 
+                          << std::endl;
+                exit(-4);
+            }
 
             //if we successfully downloaded database, try to load it//
             else if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
