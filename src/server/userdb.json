@@ -20,6 +20,11 @@
          "loginattempts" : 0,
          "salt" : "G//XulBif3pIetab76eEWQ==",
          "secret" : "EYzTHghZg391qFNz56szSPJHFtoflKyGXd0nrZzsVtw="
+      },
+      "testuser" : {
+         "loginattempts" : 0,
+         "salt" : "Usi1Ea1pQqV/BGAxRiFMgg==",
+         "secret" : "7nQ0WWybeOhYkgZbrBAinG+i7VnJgTHNq0EOu0t/FHc="
       }
    }
 }
