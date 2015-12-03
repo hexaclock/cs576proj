@@ -857,8 +857,17 @@ int main()
         std::cout << std::endl;
     }
     if (prompt_y_n("Would you like to save before exiting?", ""))
+    {
         if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
             panic("[-] Failed to save the password database file!", 3);
+        if (prompt_y_n("Would you like to upload the database to the server?", ""))
+        {
+            std::vector<std::string> param;
+            std::string cmd = "upload";
+            param.push_back(cmd);
+            parse_tls_send(1,param);
+        }
+    }
 
     return 0;
 }
