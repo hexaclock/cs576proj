@@ -145,6 +145,40 @@ bool chpass(WOLFSSL* ssl, std::string &data)
         return false;    
 }
 
+/*
+ returns: -1 if failed to connect
+           0 if local file is newer
+           1 if remote file is newer
+*/
+int timestamp(WOLFSSL *ssl, std::string &data)
+{
+    time_t remoteMtime;
+
+    if (wolfSSL_write(ssl, data.c_str(), (int)data.size()) != (int)data.size())
+    {
+        /*std::cout << "WolfSSL write error. Error: " 
+                  << wolfSSL_get_error(ssl, 0)
+                  << std::endl;*/
+        return -1;
+    }
+
+    if (wolfSSL_read(ssl, &remoteMtime, sizeof(time_t)) != (int)sizeof(time_t))
+    {
+        /*std::cout << "WolfSSL read error. Error: " 
+                  << wolfSSL_get_error(ssl, 0)
+                  << std::endl;*/
+        return -1;
+    }
+
+    const char *timeptr = strrchr(data.c_str(), ':') + 1;
+    time_t localMtime = (time_t)strtoul(timeptr,NULL,10);
+
+    if (remoteMtime > localMtime)
+        return 1;
+    else
+        return 0;
+}
+
 int tls_send(std::string &hostname, int portnum,
              std::string &data, std::string &dbpath)
 {
@@ -156,6 +190,7 @@ int tls_send(std::string &hostname, int portnum,
     int wssl_err;
     int wssl_result;
     char errorbuf[80];
+    int finalresult = 0;
 
     //DEBUG//
     /*std::cout<<hostname<<':'<<portnum<<std::endl;
@@ -248,8 +283,16 @@ int tls_send(std::string &hostname, int portnum,
         {
             ret = chpass(wssl, data);
         }
+        else if (reqType == "TIMESTAMP")
+        {
+            finalresult = timestamp(wssl,data);
+            if (finalresult != -1)
+                ret = true;
+            else
+                ret = false;
+        }
 
-        /*return 1 stands for failure of requests processing*/
+        /*return false stands for failure of requests processing*/
         if (ret == false)
         {
             wolfSSL_free(wssl);
@@ -272,5 +315,5 @@ int tls_send(std::string &hostname, int portnum,
     wolfSSL_CTX_free(wsctx);
     wolfSSL_Cleanup();
 
-    return 0;
+    return finalresult;
 }

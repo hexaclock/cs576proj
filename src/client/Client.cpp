@@ -490,6 +490,28 @@ void parse_chpass(int argc, std::vector<std::string> argv)
         std::cout << std::endl << "Incorrect password" << std::endl;
 }
 
+/*
+ returns: -1 if failed to connect
+           0 if local file is newer
+           1 if remote file is newer
+*/
+int timestamp_cmp()
+{
+    struct stat filestats;
+    time_t modtime;
+    stat(dbpath.c_str(), &filestats);
+    modtime = filestats.st_mtime;
+    secretKey = KLCrypto::sha256sum(dbpass);
+
+    reqType = "TIMESTAMP";
+    data = reqType + ":" + srvuname + ":" + secretKey + ":" + std::to_string(modtime) + "\n";
+    
+    int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
+
+    return ret;
+
+}
+
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
  *      argv MUST be 'register', 'upload' or 'download'
  * post: parses the command saved in argv and runs the appropriate function if
@@ -819,11 +841,16 @@ int main()
     }
 
     if (!newfile)
+    {
         if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
         {
             std::cout << "User's password database file not found... Creating new file" << std::endl;
             passdb["dbuser"] = username;
+            passdb["srvname"] = srvname;
+            passdb["srvport"] = srvport;
+            passdb["srvuname"] = srvuname;
         }
+    }
 
     /*set server hostname variable from database, strip quotes*/
     srvname = Json::writeString(builder,passdb["srvname"]);
@@ -846,6 +873,48 @@ int main()
     {
         std::cout << "Invalid server username in database file!" << std::endl;
         exit(3);
+    }    
+
+    //TODO: check if server is up, ask server for timestamp
+    int tscheck = timestamp_cmp();
+    
+    if (tscheck == -1)
+    {
+        std::cout << "Server is offline. Continuing in offline mode." << std::endl;
+    }
+
+    else if (tscheck == 0 || tscheck == 1)
+    {
+        if (tscheck == 0)
+        {
+            if (prompt_y_n("Local database is newer, download from server anyway?", ""))
+            {
+                std::cout << "Trying to download database from server..." << std::endl;
+                //download copy of database from server
+                std::vector<std::string> param;
+                std::string cmd = "download";
+                param.push_back(cmd);
+                parse_tls_send(1,param);
+                //parse downloaded database
+                if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
+                    panic("Failed to open downloaded database file!", -5);
+
+            }
+        }
+        else
+        {
+            std::cout << "Database on server is newer..." << std::endl;
+            std::cout << "Trying to download database from server..." << std::endl;
+            //download copy of database from server
+            std::vector<std::string> param;
+            std::string cmd = "download";
+            param.push_back(cmd);
+            parse_tls_send(1,param);
+            //parse downloaded database
+            if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
+                panic("Failed to open downloaded database file!", -5);
+
+        }
     }
 
     while(1) /* main loop */

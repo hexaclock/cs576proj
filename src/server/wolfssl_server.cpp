@@ -419,6 +419,39 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
                      << std::endl;
     }
 
+    else if (cmd == "TIMESTAMP")
+    {
+        //TIMESTAMP:USER:PASS:time_t value
+        if (cmdparts.size() == 4)
+        {
+            struct stat filestats;
+            std::string userdbpath = user + "_keylocker.db";
+            //time_t gotmodtime;
+            time_t modtime;
+            
+            std::cout << "[*] Got timestamp request from " << user
+                      << std::endl;
+
+            //file not found, send timestamp of 0
+            if (stat(userdbpath.c_str(), &filestats) == -1)
+            {
+                std::cout << "[*] " << user << " does not have a database on this server"
+                          << std::endl;
+                modtime = 0;
+            }
+            else
+                modtime = filestats.st_mtime;
+
+            if (wolfSSL_write(sslconn, &modtime, sizeof(time_t)) != sizeof(time_t))
+            {
+                std::cout << "[-] Failed to notify " << user << " of timestamp"
+                          << std::endl;
+            }
+        }
+        else
+            std::cout<<"[-] Client sent an invalid command"<<std::endl;
+    }
+
     /* client sent invalid command */
     else
     {
