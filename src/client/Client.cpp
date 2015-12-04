@@ -610,7 +610,7 @@ std::vector<std::string> read_input()
 bool parse_command(int argc, std::vector<std::string> argv)
 {
     if (argc == 0)
-        return false;
+        return true;
     else if (argv[0] == "add") /*if 'add' is the user's command*/
         parse_add(argc, argv);
     else if (argv[0] == "get") /* else if 'get' is the user's command */
@@ -875,7 +875,6 @@ int main()
         exit(3);
     }    
 
-    //TODO: check if server is up, ask server for timestamp
     int tscheck = timestamp_cmp();
     
     if (tscheck == -1)
@@ -883,11 +882,11 @@ int main()
         std::cout << "Server is offline. Continuing in offline mode." << std::endl;
     }
 
-    else if (tscheck == 0 || tscheck == 1)
+    else if (!newfile && (tscheck == 0 || tscheck == 1))
     {
         if (tscheck == 0)
         {
-            if (prompt_y_n("Local database is newer, download from server anyway?", ""))
+            if (prompt_y_n("Local database is newer, download from server anyway?", "no"))
             {
                 std::cout << "Trying to download database from server..." << std::endl;
                 //download copy of database from server
@@ -925,11 +924,11 @@ int main()
             break;
         std::cout << std::endl;
     }
-    if (prompt_y_n("Would you like to save before exiting?", ""))
+    if (prompt_y_n("Would you like to save before exiting?", "yes"))
     {
         if (!JsonParsing::writeJson(&passdb,dbpath,dbpass))
             panic("[-] Failed to save the password database file!", 3);
-        if (prompt_y_n("Would you like to upload the database to the server?", ""))
+        if (prompt_y_n("Would you like to upload the database to the server?", "yes"))
         {
             std::vector<std::string> param;
             std::string cmd = "upload";
