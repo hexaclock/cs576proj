@@ -20,8 +20,8 @@ bool regist (WOLFSSL* ssl, std::string &data)
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL read error. Error: " << ret << std::endl;
-    }   
-    
+    }
+
     if (success)
         return true;
     else
@@ -114,7 +114,7 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
 
         return false;
     }
-    
+
     fout << b64dat;
     fout.close();
 
@@ -125,7 +125,7 @@ bool chpass(WOLFSSL* ssl, std::string &data)
 {
     char success = 0;
     int ret = 0;
-    
+
     if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
     {
         ret = wolfSSL_get_error(ssl, 0);
@@ -137,12 +137,12 @@ bool chpass(WOLFSSL* ssl, std::string &data)
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL read error. Error: " << ret << std::endl;
-    }   
-    
+    }
+
     if (success)
         return true;
     else
-        return false;    
+        return false;
 }
 
 /*
@@ -156,7 +156,7 @@ int timestamp(WOLFSSL *ssl, std::string &data)
 
     if (wolfSSL_write(ssl, data.c_str(), (int)data.size()) != (int)data.size())
     {
-        /*std::cout << "WolfSSL write error. Error: " 
+        /*std::cout << "WolfSSL write error. Error: "
                   << wolfSSL_get_error(ssl, 0)
                   << std::endl;*/
         return -1;
@@ -164,7 +164,7 @@ int timestamp(WOLFSSL *ssl, std::string &data)
 
     if (wolfSSL_read(ssl, &remoteMtime, sizeof(time_t)) != (int)sizeof(time_t))
     {
-        /*std::cout << "WolfSSL read error. Error: " 
+        /*std::cout << "WolfSSL read error. Error: "
                   << wolfSSL_get_error(ssl, 0)
                   << std::endl;*/
         return -1;
@@ -290,6 +290,10 @@ int tls_send(std::string &hostname, int portnum,
                 ret = true;
             else
                 ret = false;
+        }
+        else
+        {
+            ret = false;
         }
 
         /*return false stands for failure of requests processing*/
