@@ -12,19 +12,19 @@ Our password manager for CS576.
 
 `gen <length>`:   Generates a random password of length `length`.
 
-`get [<service> <username>]`:    Retrieves the entry for key: `<service>_<username>` from the database if they were provided, else returns a list of all entries. Reports error message if no such key exists.
+`get [<service> <username> | <numRef>]`:    Retrieves the entry for key: `<service>_<username>` or the entry for `<numRef>` from the database if they were provided, else returns a list of all entries. Reports error message if no such key exists.
 
-`list [<service> <username>]`:   List is an alias for `get`.
+`list [<service> <username> | <numRef>]`:   List is an alias for `get`.
 
-`print [<service> <username>]`:   Print is also an alias for `get`.
+`print [<service> <username> | <numRef>]`:   Print is also an alias for `get`.
 
 `search <pattern>`:    Retrieves all entries that contain the string `pattern` in either their "service", "username" or "notes" fields.
 
-`clip <service> <username>`:	Copies the password for key: `<service>_<username>` to the clipboard if the entry exists, then overwrites the clipboard. Requires X window manager / xclip.
+`clip (<service> <username> | <numRef>)`:	Copies the password for key: `<service>_<username>` or the entry for `<numRef>` to the clipboard if the entry exists, then overwrites the clipboard. Requires X window manager / xclip.
 
-`edit <service> <username>`:	 Edits an existing entry for key: `<service>_<username>` with new values provided by user. Reports error message if no such key exists.
+`edit (<service> <username> | <numRef>)`:	 Edits an existing entry for key: `<service>_<username>` or the entry for `<numRef>` with new values provided by user. Reports error message if no such key exists.
 
-`delete <service> <username>`: Deletes an existing entry for key: `<service>_<username>`. Reports error message if no such key exists.
+`delete (<service> <username> | <numRef>)`: Deletes an existing entry for key: `<service>_<username>` or the entry for `<numRef>`. Reports error message if no such key exists.
 
 `save`:         Save a local copy of the database without uploading to server.
 

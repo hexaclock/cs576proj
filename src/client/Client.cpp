@@ -4,30 +4,31 @@
 void parse_tls_send(int argc, std::vector<std::string> argv);
 
 std::string HELP_TEXT = "Commands can be any of the following:\
-\n\t'add [<length>]':\t\tAdds a new entry to the database with a random password \
+\n\t'add [<length>]':\t\t\t\tAdds a new entry to the database with a random password \
 of specified length (or prompts user for password if length was 0 or not included).\
-\n\t'gen <length>':\t\t\tGenerates a random password of specified length.\
-\n\t'get [<service> <username>]':\tRetrieves the entry for \
-key: '<service>_<username>' from the database if they were provided,\
-else returns a list of all entries. Reports error message if no such key exists.\
-\n\t'list [<service> <username>]':\tList is an alias for 'get'.\
-\n\t'print [<service> <username>]':\tPrint is an alias for 'get'.\
-\n\t'search <pattern>':\tRetrieves all entries that contain pattern in either \
+\n\t'gen <length>':\t\t\t\t\tGenerates a random password of specified length.\
+\n\t'get [<service> <username> | <numRef>]':\tRetrieves the entry for \
+key: '<service>_<username>' or the entry for <numRef> from the database if they \
+were provided, else returns a list of all entries. Reports error message if no \
+such key exists.\
+\n\t'list [<service> <username> | <numRef>]':\tList is an alias for 'get'.\
+\n\t'print [<service> <username> | <numRef>]':\tPrint is an alias for 'get'.\
+\n\t'search <pattern>':\t\t\t\tRetrieves all entries that contain pattern in either \
 their service, username or notes fields.\
-\n\t'clip <service> <username>':\tCopies the password for key: '<service>_<username>' \
-to the clipboard if the entry exists. Requires X window manager / xclip. \
-\n\t'edit <service> <username>':\tEdits an existing entry for key: \
-'<service>_<username>' with new values provided by user. Reports error message \
-if no such key exists.\
-\n\t'delete <service> <username>':\tDeletes an existing entry for key: \
-'<service>_<username>'. Reports error message if no such key exists.\
-\n\t'save':\t\t\t\tSave a local copy of the database without uploading to server.\
-\n\t'register':\t\t\tAttempt to register with previously specified server.\
-\n\t'chpass':\t\t\tChange database password and update record on server.\
-\n\t'upload':\t\t\tSave database to disk and upload to server.\
-\n\t'download':\t\t\tDownload the database file stored on the server.\
-\n\t'quit':\t\t\t\tExits the program.\
-\n\t'help':\t\t\t\tDisplays this list of commands.";
+\n\t'clip (<service> <username> | <numRef>)':\tCopies the password for key: '<service>_<username>' \
+or the entry for <numRef> to the clipboard if the entry exists. Requires X window manager / xclip. \
+\n\t'edit (<service> <username> | <numRef>)':\tEdits an existing entry for key: \
+'<service>_<username>' or the entry for <numRef> with new values provided by user. \
+Reports error message if no such key exists.\
+\n\t'delete (<service> <username> | <numRef>)':\tDeletes an existing entry for key: \
+'<service>_<username>' or the entry for <numRef>. Reports error message if no such key exists.\
+\n\t'save':\t\t\t\t\t\tSave a local copy of the database without uploading to server.\
+\n\t'register':\t\t\t\t\tAttempt to register with previously specified server.\
+\n\t'chpass':\t\t\t\t\tChange database password and update record on server.\
+\n\t'upload':\t\t\t\t\tSave database to disk and upload to server.\
+\n\t'download':\t\t\t\t\tDownload the database file stored on the server.\
+\n\t'quit':\t\t\t\t\t\tExits the program.\
+\n\t'help':\t\t\t\t\t\tDisplays this list of commands.";
 
 //remote things
 std::string srvname; //the name of remote server
