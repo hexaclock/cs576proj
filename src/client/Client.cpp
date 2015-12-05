@@ -235,12 +235,44 @@ void get_entry(Json::Value *passdb, std::string request)
  */
 void parse_get(int argc, std::vector<std::string> argv)
 {
-    if (argc == 3) /* prg get service username */
+    if (argc == 3) /* get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
-    else if (argc == 1) /* prg get */
+    else if (argc == 1) /* get */
         get_entry(&passdb, "");
     else
         std::cout << "usage: get [<service> <username>]" << std::endl;
+}
+
+/* pre: takes in a Json::Value* passdb and a std::string pattern
+ * post: if pattern is not empty prints out the keylocker database entries that
+ *      match the pattern
+ */
+void search(Json::Value *passdb, std::string pattern)
+{
+    Json::Value::iterator it;
+    Json::StreamWriterBuilder builder;
+
+    if (pattern.empty())
+        return;
+
+    it = (*passdb)["dbentry"].begin();
+    for (; it != (*passdb)["dbentry"].end(); it++)
+    {
+        //TODO:
+    }
+}
+
+/* pre: takes in int argc and std::vector<std::string> argv, the first item of
+ *      argv MUST be 'search'
+ * post: parses the command saved in argv and runs the appropriate function if
+ *      one exists
+ */
+void parse_search(int argc, std::vector<std::string> argv)
+{
+    if (argc != 2)
+        std::cout << "usage: search <pattern>" << std::endl;
+    else
+        search(&passdb, argv[1]);
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -619,6 +651,8 @@ bool parse_command(int argc, std::vector<std::string> argv)
         parse_add(argc, argv);
     else if (argv[0] == "get"|| argv[0] == "list")
         parse_get(argc, argv);
+    else if (argv[0] == "search")
+        parse_search(argc, argv);
     else if (argv[0] == "clip")
         parse_clip(argc, argv);
     else if (argv[0] == "delete")
