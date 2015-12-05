@@ -138,6 +138,7 @@ void add_entry(Json::Value *passdb, int randlen)
         std::getline(std::cin,password);
         showterm();
         std::cin.sync();
+        std::cout << std::endl;
     }
 
     entry = service + "_" + username;
@@ -145,13 +146,15 @@ void add_entry(Json::Value *passdb, int randlen)
     // This will prevent some fault operation.
     if ((*passdb)["dbentry"].isMember(entry))
     {
-        panic("Entry already exists", 4);
+        std::cout << "An entry for that service username pair already exists" << std::endl;
     }
-
-    (*passdb)["dbentry"][entry]["service"] = service;
-    (*passdb)["dbentry"][entry]["username"] = username;
-    (*passdb)["dbentry"][entry]["password"] = password;
-    (*passdb)["dbentry"][entry]["notes"] = notes;
+    else
+    {
+        (*passdb)["dbentry"][entry]["service"] = service;
+        (*passdb)["dbentry"][entry]["username"] = username;
+        (*passdb)["dbentry"][entry]["password"] = password;
+        (*passdb)["dbentry"][entry]["notes"] = notes;
+    }
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -218,7 +221,7 @@ void get_entry(Json::Value *passdb, std::string request)
         if ((*passdb)["dbentry"].isMember(request))
             print_entry(passdb, request, true, 0); //show passwords when requesting a specific entry
         else
-            panic("No such entry, please check your input", 2);
+            std::cout << "No such entry, please check your input" << std::endl;
     }
     else /* get all */
     {
