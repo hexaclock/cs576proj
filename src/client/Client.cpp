@@ -413,6 +413,17 @@ int delete_entry(Json::Value *passdb, std::string request)
         return 1;
 }
 
+/* pre: takes in string
+ * post: return if the string is a number
+ * return: 1 on number characters; 0 on non-digit characters
+ */
+bool is_number(const std::string& s)
+{
+	std::string::const_iterator it = s.begin();
+	while (it != s.end() && std::isdigit(*it)) ++it;
+	return !s.empty() && it == s.end();
+}
+
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
  *      argv MUST be 'delete'
  * post: parses the command saved in argv and runs the appropriate function if
@@ -438,7 +449,7 @@ void parse_delete(int argc, std::vector<std::string> argv)
                 std::cout << "No such entry, please check your input" << std::endl;
         }
     }
-    else if (argc == 2)
+    else if (argc == 2 && is_number(argv[1]))
     {
         if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
         {
