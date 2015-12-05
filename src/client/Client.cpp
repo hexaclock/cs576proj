@@ -249,8 +249,13 @@ void parse_get(int argc, std::vector<std::string> argv)
  */
 void search(Json::Value *passdb, std::string pattern)
 {
+    Json::Value val;
     Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
+    std::string key;
+    std::string service;
+    std::string username;
+    std::string notes;
 
     if (pattern.empty())
         return;
@@ -258,7 +263,25 @@ void search(Json::Value *passdb, std::string pattern)
     it = (*passdb)["dbentry"].begin();
     for (; it != (*passdb)["dbentry"].end(); it++)
     {
-        //TODO:
+        key = Json::writeString(builder, it.key());
+        key.erase(remove(key.begin(), key.end(), '\"'), key.end());
+
+        val = (*passdb)["dbentry"][key]["service"];
+        service = Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][key]["username"];
+        username = Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][key]["notes"];
+        notes = Json::writeString(builder, val);
+
+        if (service.find(pattern) != std::string::npos ||
+                username.find(pattern) != std::string::npos ||
+                notes.find(pattern) != std::string::npos)
+        {
+            print_entry(passdb, key, false);
+            continue;
+        }
     }
 }
 
