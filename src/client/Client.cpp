@@ -4,30 +4,31 @@
 void parse_tls_send(int argc, std::vector<std::string> argv);
 
 std::string HELP_TEXT = "Commands can be any of the following:\
-\n\t'add [<length>]':\t\tAdds a new entry to the database with a random password \
+\n\t'add [<length>]':\t\t\t\tAdds a new entry to the database with a random password \
 of specified length (or prompts user for password if length was 0 or not included).\
-\n\t'gen <length>':\t\t\tGenerates a random password of specified length.\
-\n\t'get [<service> <username>]':\tRetrieves the entry for \
-key: '<service>_<username>' from the database if they were provided,\
-else returns a list of all entries. Reports error message if no such key exists.\
-\n\t'list [<service> <username>]':\tList is an alias for 'get'.\
-\n\t'print [<service> <username>]':\tPrint is an alias for 'get'.\
-\n\t'search <pattern>':\tRetrieves all entries that contain pattern in either \
+\n\t'gen <length>':\t\t\t\t\tGenerates a random password of specified length.\
+\n\t'get [<service> <username> | <numRef>]':\tRetrieves the entry for \
+key: '<service>_<username>' or the entry for <numRef> from the database if they \
+were provided, else returns a list of all entries. Reports error message if no \
+such key exists.\
+\n\t'list [<service> <username> | <numRef>]':\tList is an alias for 'get'.\
+\n\t'print [<service> <username> | <numRef>]':\tPrint is an alias for 'get'.\
+\n\t'search <pattern>':\t\t\t\tRetrieves all entries that contain pattern in either \
 their service, username or notes fields.\
-\n\t'clip <service> <username>':\tCopies the password for key: '<service>_<username>' \
-to the clipboard if the entry exists. Requires X window manager / xclip. \
-\n\t'edit <service> <username>':\tEdits an existing entry for key: \
-'<service>_<username>' with new values provided by user. Reports error message \
-if no such key exists.\
-\n\t'delete <service> <username>':\tDeletes an existing entry for key: \
-'<service>_<username>'. Reports error message if no such key exists.\
-\n\t'save':\t\t\t\tSave a local copy of the database without uploading to server.\
-\n\t'register':\t\t\tAttempt to register with previously specified server.\
-\n\t'chpass':\t\t\tChange database password and update record on server.\
-\n\t'upload':\t\t\tSave database to disk and upload to server.\
-\n\t'download':\t\t\tDownload the database file stored on the server.\
-\n\t'quit':\t\t\t\tExits the program.\
-\n\t'help':\t\t\t\tDisplays this list of commands.";
+\n\t'clip (<service> <username> | <numRef>)':\tCopies the password for key: '<service>_<username>' \
+or the entry for <numRef> to the clipboard if the entry exists. Requires X window manager / xclip. \
+\n\t'edit (<service> <username> | <numRef>)':\tEdits an existing entry for key: \
+'<service>_<username>' or the entry for <numRef> with new values provided by user. \
+Reports error message if no such key exists.\
+\n\t'delete (<service> <username> | <numRef>)':\tDeletes an existing entry for key: \
+'<service>_<username>' or the entry for <numRef>. Reports error message if no such key exists.\
+\n\t'save':\t\t\t\t\t\tSave a local copy of the database without uploading to server.\
+\n\t'register':\t\t\t\t\tAttempt to register with previously specified server.\
+\n\t'chpass':\t\t\t\t\tChange database password and update record on server.\
+\n\t'upload':\t\t\t\t\tSave database to disk and upload to server.\
+\n\t'download':\t\t\t\t\tDownload the database file stored on the server.\
+\n\t'quit':\t\t\t\t\t\tExits the program.\
+\n\t'help':\t\t\t\t\t\tDisplays this list of commands.";
 
 //remote things
 std::string srvname; //the name of remote server
@@ -45,6 +46,7 @@ std::string dbpath; //path to the local database file
 std::string dbpass; //password for the local database file
 std::string kldir; //directory for keylocker files
 Json::Value passdb; //the local database root
+std::vector<std::string> numRefs; //interactive number references for entries
 
 /* pre: takes in an std::string msg and int code
  * post: prints msg to stdout and exits with error code code
@@ -75,6 +77,19 @@ void showterm()
     tcgetattr(STDIN_FILENO, &tty);
     tty.c_lflag |= ECHO;
     tcsetattr(STDIN_FILENO, TCSANOW, &tty);
+}
+
+/* pre: takes in an int n
+ * post: does error checking and returns the database key value saving at
+ *      position n in numRefs
+ * return: an std::string of the passdb key if it exists, else the empty string
+ */
+std::string get_numRef(int n)
+{
+    if (!numRefs.empty() && n > 0 && (unsigned long)n < numRefs.size())
+        return numRefs.at(n);
+    else
+        return "";
 }
 
 /* pre: takes in an integer len
@@ -138,6 +153,7 @@ void add_entry(Json::Value *passdb, int randlen)
         std::getline(std::cin,password);
         showterm();
         std::cin.sync();
+        std::cout << std::endl;
     }
 
     entry = service + "_" + username;
@@ -145,13 +161,15 @@ void add_entry(Json::Value *passdb, int randlen)
     // This will prevent some fault operation.
     if ((*passdb)["dbentry"].isMember(entry))
     {
-        panic("Entry already exists", 4);
+        std::cout << "An entry for that service username pair already exists" << std::endl;
     }
-
-    (*passdb)["dbentry"][entry]["service"] = service;
-    (*passdb)["dbentry"][entry]["username"] = username;
-    (*passdb)["dbentry"][entry]["password"] = password;
-    (*passdb)["dbentry"][entry]["notes"] = notes;
+    else
+    {
+        (*passdb)["dbentry"][entry]["service"] = service;
+        (*passdb)["dbentry"][entry]["username"] = username;
+        (*passdb)["dbentry"][entry]["password"] = password;
+        (*passdb)["dbentry"][entry]["notes"] = notes;
+    }
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -167,20 +185,27 @@ void parse_add(int argc, std::vector<std::string> argv)
         add_entry(&passdb, 0);
 }
 
-/* pre: takes in a Json::Value* passdb an std::string dbentry_key and a boolean
- *      show_pass
+/* pre: takes in a Json::Value* passdb an std::string dbentry_key a boolean
+ *      show_pass, and an int num
  * post: prints out the dbentry in the keylocker database pointed to by passdb
  *      that has the key dbentry_key, if show_pass is true, prints the password
- *      in plaintext, else prints a string of *'s
+ *      in plaintext, else prints a string of *'s, if num is greater than zero
+ *      prepend it to the information printed out
  */
-void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass)
+void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass, int num)
 {
     Json::Value val;
     Json::StreamWriterBuilder builder;
     std::string line;
 
+    line = "";
     val = (*passdb)["dbentry"][dbentry_key]["service"];
-    line = "Service:\t" + Json::writeString(builder, val);
+    if (num > 0)
+    {
+        line += "[" + std::to_string(num) + "] ";
+        numRefs.push_back(dbentry_key);
+    }
+    line += "Service:\t" + Json::writeString(builder, val);
 
     val = (*passdb)["dbentry"][dbentry_key]["username"];
     line += "\n\tUsername:\t" + Json::writeString(builder, val);
@@ -207,18 +232,21 @@ void get_entry(Json::Value *passdb, std::string request)
 {
     Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
+    int i;
 
     if (!request.empty()) /* get where key=request */
     {
         if ((*passdb)["dbentry"].isMember(request))
-            print_entry(passdb, request, true); //show passwords when requesting a specific entry
+            print_entry(passdb, request, true, 0); //show passwords when requesting a specific entry
         else
-            panic("No such entry, please check your input", 2);
+            std::cout << "No such entry, please check your input" << std::endl;
     }
     else /* get all */
     {
         it = (*passdb)["dbentry"].begin();
-        for (; it != (*passdb)["dbentry"].end(); it++)
+        if (!numRefs.empty())
+            numRefs.clear();
+        for (i = 1; it != (*passdb)["dbentry"].end(); it++, i++)
         {
             //this gets the key from the iterator, but returns it in quotes
             request = Json::writeString(builder, it.key());
@@ -226,7 +254,7 @@ void get_entry(Json::Value *passdb, std::string request)
             //this removes the quotes
             request.erase(remove(request.begin(), request.end(), '\"'), request.end());
 
-            print_entry(passdb, request, false); //don't show passwords when printing the whole list
+            print_entry(passdb, request, false, i); //don't show passwords when printing the whole list
         }
     }
 }
@@ -238,12 +266,21 @@ void get_entry(Json::Value *passdb, std::string request)
  */
 void parse_get(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3) /* get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
+    else if (argc == 2) /* get numRef */
+    {
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+            get_entry(&passdb, numRef);
+        else
+            std::cout << "Number reference error" << std::endl;
+    }
     else if (argc == 1) /* get */
         get_entry(&passdb, "");
     else
-        std::cout << "usage: get [<service> <username>]" << std::endl;
+        std::cout << "usage: get [<service> <username> | <numRef>]" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string pattern
@@ -259,12 +296,15 @@ void search(Json::Value *passdb, std::string pattern)
     std::string service;
     std::string username;
     std::string notes;
+    int i;
 
     if (pattern.empty())
         return;
 
     it = (*passdb)["dbentry"].begin();
-    for (; it != (*passdb)["dbentry"].end(); it++)
+    if (!numRefs.empty())
+        numRefs.clear();
+    for (i = 1; it != (*passdb)["dbentry"].end(); it++, i++)
     {
         key = Json::writeString(builder, it.key());
         key.erase(remove(key.begin(), key.end(), '\"'), key.end());
@@ -282,7 +322,7 @@ void search(Json::Value *passdb, std::string pattern)
                 username.find(pattern) != std::string::npos ||
                 notes.find(pattern) != std::string::npos)
         {
-            print_entry(passdb, key, false);
+            print_entry(passdb, key, false, i);
             continue;
         }
     }
@@ -343,10 +383,19 @@ void clip(Json::Value *passdb, std::string request)
  */
 void parse_clip(int argc, std::vector<std::string> argv)
 {
-    if (argc == 3)
+    std::string numRef;
+
+    if (argc == 3) //clip service username
         clip(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
+    else if (argc == 2) //clip numRef
+    {
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+            clip(&passdb, numRef);
+        else
+            std::cout << "Number reference error" << std::endl;
+    }
     else
-        std::cout << "usage: clip [<service> <username>]" << std::endl;
+        std::cout << "usage: clip (<service> <username> | <numRef>)" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -371,6 +420,8 @@ int delete_entry(Json::Value *passdb, std::string request)
  */
 void parse_delete(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3)
     {
         if (prompt_y_n("Are you sure you wish to delete "
@@ -387,8 +438,28 @@ void parse_delete(int argc, std::vector<std::string> argv)
                 std::cout << "No such entry, please check your input" << std::endl;
         }
     }
+    else if (argc == 2)
+    {
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+        {
+            if (prompt_y_n("Are you sure you wish to delete "
+                        + numRef + "?",
+                        ""))
+            {
+                int ret = delete_entry(&passdb, numRef);
+                if (ret == 0)
+                {
+                    std::cout << "Entry deleted" << std::endl;
+                }
+                else if (ret == 1)
+                    std::cout << "No such entry, please check your input" << std::endl;
+            }
+        }
+        else
+            std::cout << "Number reference error" << std::endl;
+    }
     else
-        std::cout << "usage: delete [<service> <username>]" << std::endl;
+        std::cout << "usage: delete (<service> <username> | <numRef>)" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -444,6 +515,8 @@ int update_entry(Json::Value *passdb, std::string request)
  */
 void parse_edit(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3)
     {
         int ret = update_entry(&passdb, (std::string)argv[1] + "_" +
@@ -457,8 +530,25 @@ void parse_edit(int argc, std::vector<std::string> argv)
             std::cout << "No such entry, please check your input" << std::endl;
         }
     }
+    else if (argc == 2)
+    {
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+        {
+            int ret = update_entry(&passdb, numRef);
+            if (ret == 0)
+            {
+                std::cout << "Entry updated" << std::endl;
+            }
+            else if (ret == 1)
+            {
+                std::cout << "No such entry, please check your input" << std::endl;
+            }
+        }
+        else
+            std::cout << "Number reference error" << std::endl;
+    }
     else
-        std::cout << "usage: edit [<service> <username>]" << std::endl;
+        std::cout << "usage: edit (<service> <username> | <numRef>)" << std::endl;
 }
 
 /* pre: takes in a std:string curpass
