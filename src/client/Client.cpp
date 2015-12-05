@@ -45,6 +45,7 @@ std::string dbpath; //path to the local database file
 std::string dbpass; //password for the local database file
 std::string kldir; //directory for keylocker files
 Json::Value passdb; //the local database root
+std::vector<std::string> numRefs; //interactive number references for entries
 
 /* pre: takes in an std::string msg and int code
  * post: prints msg to stdout and exits with error code code
@@ -186,7 +187,10 @@ void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass, i
     line = "";
     val = (*passdb)["dbentry"][dbentry_key]["service"];
     if (num > 0)
+    {
         line += "[" + std::to_string(num) + "] ";
+        numRefs.push_back(dbentry_key);
+    }
     line += "Service:\t" + Json::writeString(builder, val);
 
     val = (*passdb)["dbentry"][dbentry_key]["username"];
@@ -226,6 +230,8 @@ void get_entry(Json::Value *passdb, std::string request)
     else /* get all */
     {
         it = (*passdb)["dbentry"].begin();
+        if (!numRefs.empty())
+            numRefs.clear();
         for (i = 1; it != (*passdb)["dbentry"].end(); it++, i++)
         {
             //this gets the key from the iterator, but returns it in quotes
@@ -248,10 +254,12 @@ void parse_get(int argc, std::vector<std::string> argv)
 {
     if (argc == 3) /* get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
+    else if (argc == 2) /* get numRef */
+        get_entry(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
     else if (argc == 1) /* get */
         get_entry(&passdb, "");
     else
-        std::cout << "usage: get [<service> <username>]" << std::endl;
+        std::cout << "usage: get [<service> <username> | <numRef>]" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string pattern
@@ -273,6 +281,8 @@ void search(Json::Value *passdb, std::string pattern)
         return;
 
     it = (*passdb)["dbentry"].begin();
+    if (!numRefs.empty())
+        numRefs.clear();
     for (i = 1; it != (*passdb)["dbentry"].end(); it++, i++)
     {
         key = Json::writeString(builder, it.key());
@@ -352,10 +362,12 @@ void clip(Json::Value *passdb, std::string request)
  */
 void parse_clip(int argc, std::vector<std::string> argv)
 {
-    if (argc == 3)
+    if (argc == 3) //clip service username
         clip(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
+    else if (argc == 2) //clip numRef
+        clip(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
     else
-        std::cout << "usage: clip [<service> <username>]" << std::endl;
+        std::cout << "usage: clip (<service> <username> | <numRef>)" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -396,8 +408,23 @@ void parse_delete(int argc, std::vector<std::string> argv)
                 std::cout << "No such entry, please check your input" << std::endl;
         }
     }
+    else if (argc == 2)
+    {
+        if (prompt_y_n("Are you sure you wish to delete "
+                    + numRefs.at(std::stoi(argv[1]) - 1) + "?",
+                    ""))
+        {
+            int ret = delete_entry(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
+            if (ret == 0)
+            {
+                std::cout << "Entry deleted" << std::endl;
+            }
+            else if (ret == 1)
+                std::cout << "No such entry, please check your input" << std::endl;
+        }
+    }
     else
-        std::cout << "usage: delete [<service> <username>]" << std::endl;
+        std::cout << "usage: delete (<service> <username> | <numRef>)" << std::endl;
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -466,8 +493,20 @@ void parse_edit(int argc, std::vector<std::string> argv)
             std::cout << "No such entry, please check your input" << std::endl;
         }
     }
+    else if (argc == 2)
+    {
+        int ret = update_entry(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
+        if (ret == 0)
+        {
+            std::cout << "Entry updated" << std::endl;
+        }
+        else if (ret == 1)
+        {
+            std::cout << "No such entry, please check your input" << std::endl;
+        }
+    }
     else
-        std::cout << "usage: edit [<service> <username>]" << std::endl;
+        std::cout << "usage: edit (<service> <username> | <numRef>)" << std::endl;
 }
 
 /* pre: takes in a std:string curpass
