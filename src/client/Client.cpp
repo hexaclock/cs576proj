@@ -164,11 +164,13 @@ void parse_add(int argc, std::vector<std::string> argv)
         add_entry(&passdb, 0);
 }
 
-/* pre: takes in a Json::Value* passdb and an std::string dbentry_key
+/* pre: takes in a Json::Value* passdb an std::string dbentry_key and a boolean
+ *      show_pass
  * post: prints out the dbentry in the keylocker database pointed to by passdb
- *      that has the key dbentry_key
+ *      that has the key dbentry_key, if show_pass is true, prints the password
+ *      in plaintext, else prints a string of *'s
  */
-void print_entry(Json::Value *passdb, std::string dbentry_key)
+void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass)
 {
     Json::Value val;
     Json::StreamWriterBuilder builder;
@@ -180,8 +182,13 @@ void print_entry(Json::Value *passdb, std::string dbentry_key)
     val = (*passdb)["dbentry"][dbentry_key]["username"];
     line += "\n\tUsername:\t" + Json::writeString(builder, val);
 
-    val = (*passdb)["dbentry"][dbentry_key]["password"];
-    line += "\n\tPassword:\t" + Json::writeString(builder, val);
+    if (show_pass)
+    {
+        val = (*passdb)["dbentry"][dbentry_key]["password"];
+        line += "\n\tPassword:\t" + Json::writeString(builder, val);
+    }
+    else
+        line += "\n\tPassword:\t*****";
 
     val = (*passdb)["dbentry"][dbentry_key]["notes"];
     line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
@@ -201,7 +208,7 @@ void get_entry(Json::Value *passdb, std::string request)
     if (!request.empty()) /* get where key=request */
     {
         if ((*passdb)["dbentry"].isMember(request))
-            print_entry(passdb, request);
+            print_entry(passdb, request, true); //show passwords when requesting a specific entry
         else
             panic("No such entry, please check your input", 2);
     }
@@ -216,7 +223,7 @@ void get_entry(Json::Value *passdb, std::string request)
             //this removes the quotes
             request.erase(remove(request.begin(), request.end(), '\"'), request.end());
 
-            print_entry(passdb, request);
+            print_entry(passdb, request, false); //don't show passwords when printing the whole list
         }
     }
 }
