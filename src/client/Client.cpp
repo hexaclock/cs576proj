@@ -167,20 +167,24 @@ void parse_add(int argc, std::vector<std::string> argv)
         add_entry(&passdb, 0);
 }
 
-/* pre: takes in a Json::Value* passdb an std::string dbentry_key and a boolean
- *      show_pass
+/* pre: takes in a Json::Value* passdb an std::string dbentry_key a boolean
+ *      show_pass, and an int num
  * post: prints out the dbentry in the keylocker database pointed to by passdb
  *      that has the key dbentry_key, if show_pass is true, prints the password
- *      in plaintext, else prints a string of *'s
+ *      in plaintext, else prints a string of *'s, if num is greater than zero
+ *      prepend it to the information printed out
  */
-void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass)
+void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass, int num)
 {
     Json::Value val;
     Json::StreamWriterBuilder builder;
     std::string line;
 
+    line = "";
     val = (*passdb)["dbentry"][dbentry_key]["service"];
-    line = "Service:\t" + Json::writeString(builder, val);
+    if (num > 0)
+        line += "[" + std::to_string(num) + "] ";
+    line += "Service:\t" + Json::writeString(builder, val);
 
     val = (*passdb)["dbentry"][dbentry_key]["username"];
     line += "\n\tUsername:\t" + Json::writeString(builder, val);
@@ -207,18 +211,19 @@ void get_entry(Json::Value *passdb, std::string request)
 {
     Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
+    int i;
 
     if (!request.empty()) /* get where key=request */
     {
         if ((*passdb)["dbentry"].isMember(request))
-            print_entry(passdb, request, true); //show passwords when requesting a specific entry
+            print_entry(passdb, request, true, 0); //show passwords when requesting a specific entry
         else
             panic("No such entry, please check your input", 2);
     }
     else /* get all */
     {
         it = (*passdb)["dbentry"].begin();
-        for (; it != (*passdb)["dbentry"].end(); it++)
+        for (i = 1; it != (*passdb)["dbentry"].end(); it++, i++)
         {
             //this gets the key from the iterator, but returns it in quotes
             request = Json::writeString(builder, it.key());
@@ -226,7 +231,7 @@ void get_entry(Json::Value *passdb, std::string request)
             //this removes the quotes
             request.erase(remove(request.begin(), request.end(), '\"'), request.end());
 
-            print_entry(passdb, request, false); //don't show passwords when printing the whole list
+            print_entry(passdb, request, false, i); //don't show passwords when printing the whole list
         }
     }
 }
@@ -259,12 +264,13 @@ void search(Json::Value *passdb, std::string pattern)
     std::string service;
     std::string username;
     std::string notes;
+    int i;
 
     if (pattern.empty())
         return;
 
     it = (*passdb)["dbentry"].begin();
-    for (; it != (*passdb)["dbentry"].end(); it++)
+    for (i = 1; it != (*passdb)["dbentry"].end(); it++, i++)
     {
         key = Json::writeString(builder, it.key());
         key.erase(remove(key.begin(), key.end(), '\"'), key.end());
@@ -282,7 +288,7 @@ void search(Json::Value *passdb, std::string pattern)
                 username.find(pattern) != std::string::npos ||
                 notes.find(pattern) != std::string::npos)
         {
-            print_entry(passdb, key, false);
+            print_entry(passdb, key, false, i);
             continue;
         }
     }
