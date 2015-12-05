@@ -78,6 +78,19 @@ void showterm()
     tcsetattr(STDIN_FILENO, TCSANOW, &tty);
 }
 
+/* pre: takes in an int n
+ * post: does error checking and returns the database key value saving at
+ *      position n in numRefs
+ * return: an std::string of the passdb key if it exists, else the empty string
+ */
+std::string get_numRef(int n)
+{
+    if (!numRefs.empty() && n > 0 && (unsigned long)n < numRefs.size())
+        return numRefs.at(n);
+    else
+        return "";
+}
+
 /* pre: takes in an integer len
  * post: returns a random string of len characters, encoded in b64
  */
@@ -252,10 +265,17 @@ void get_entry(Json::Value *passdb, std::string request)
  */
 void parse_get(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3) /* get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
     else if (argc == 2) /* get numRef */
-        get_entry(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
+    {
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+            get_entry(&passdb, numRef);
+        else
+            std::cout << "Number reference error" << std::endl;
+    }
     else if (argc == 1) /* get */
         get_entry(&passdb, "");
     else
@@ -362,10 +382,17 @@ void clip(Json::Value *passdb, std::string request)
  */
 void parse_clip(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3) //clip service username
         clip(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
     else if (argc == 2) //clip numRef
-        clip(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
+    {
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+            clip(&passdb, numRef);
+        else
+            std::cout << "Number reference error" << std::endl;
+    }
     else
         std::cout << "usage: clip (<service> <username> | <numRef>)" << std::endl;
 }
@@ -392,6 +419,8 @@ int delete_entry(Json::Value *passdb, std::string request)
  */
 void parse_delete(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3)
     {
         if (prompt_y_n("Are you sure you wish to delete "
@@ -410,18 +439,23 @@ void parse_delete(int argc, std::vector<std::string> argv)
     }
     else if (argc == 2)
     {
-        if (prompt_y_n("Are you sure you wish to delete "
-                    + numRefs.at(std::stoi(argv[1]) - 1) + "?",
-                    ""))
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
         {
-            int ret = delete_entry(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
-            if (ret == 0)
+            if (prompt_y_n("Are you sure you wish to delete "
+                        + numRef + "?",
+                        ""))
             {
-                std::cout << "Entry deleted" << std::endl;
+                int ret = delete_entry(&passdb, numRef);
+                if (ret == 0)
+                {
+                    std::cout << "Entry deleted" << std::endl;
+                }
+                else if (ret == 1)
+                    std::cout << "No such entry, please check your input" << std::endl;
             }
-            else if (ret == 1)
-                std::cout << "No such entry, please check your input" << std::endl;
         }
+        else
+            std::cout << "Number reference error" << std::endl;
     }
     else
         std::cout << "usage: delete (<service> <username> | <numRef>)" << std::endl;
@@ -480,6 +514,8 @@ int update_entry(Json::Value *passdb, std::string request)
  */
 void parse_edit(int argc, std::vector<std::string> argv)
 {
+    std::string numRef;
+
     if (argc == 3)
     {
         int ret = update_entry(&passdb, (std::string)argv[1] + "_" +
@@ -495,15 +531,20 @@ void parse_edit(int argc, std::vector<std::string> argv)
     }
     else if (argc == 2)
     {
-        int ret = update_entry(&passdb, numRefs.at(std::stoi(argv[1]) - 1));
-        if (ret == 0)
+        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
         {
-            std::cout << "Entry updated" << std::endl;
+            int ret = update_entry(&passdb, numRef);
+            if (ret == 0)
+            {
+                std::cout << "Entry updated" << std::endl;
+            }
+            else if (ret == 1)
+            {
+                std::cout << "No such entry, please check your input" << std::endl;
+            }
         }
-        else if (ret == 1)
-        {
-            std::cout << "No such entry, please check your input" << std::endl;
-        }
+        else
+            std::cout << "Number reference error" << std::endl;
     }
     else
         std::cout << "usage: edit (<service> <username> | <numRef>)" << std::endl;
