@@ -7,11 +7,14 @@ std::string HELP_TEXT = "Commands can be any of the following:\
 \n\t'add [<length>]':\t\tAdds a new entry to the database with a random password \
 of specified length (or prompts user for password if length was 0 or not included).\
 \n\t'gen <length>':\t\t\tGenerates a random password of specified length.\
+\n\t'list':\t\t\tPrints all entries with usernames and notes.\
 \n\t'get [<service> <username>]':\tRetrieves the entry for \
 key: '<service>_<username>' from the database if they were provided,\
 else returns a list of all entries. Reports error message if no such key exists.\
 \n\t'clip <service> <username>':\tCopies the password for key: '<service>_<username>' \
 to the clipboard if the entry exists. Requires X window manager / xclip. \
+\n\t'print <service> <username>':\tPrints the password for key '<service>_<username>' \
+if the entry exists. \
 \n\t'edit <service> <username>':\tEdits an existing entry for key: \
 '<service>_<username>' with new values provided by user. Reports error message \
 if no such key exists.\
@@ -179,8 +182,8 @@ void print_entry(Json::Value *passdb, std::string dbentry_key)
     val = (*passdb)["dbentry"][dbentry_key]["username"];
     line += "\n\tUsername:\t" + Json::writeString(builder, val);
 
-    val = (*passdb)["dbentry"][dbentry_key]["password"];
-    line += "\n\tPassword:\t" + Json::writeString(builder, val);
+    //val = (*passdb)["dbentry"][dbentry_key]["password"];
+    //line += "\n\tPassword:\t" + Json::writeString(builder, val);
 
     val = (*passdb)["dbentry"][dbentry_key]["notes"];
     line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
@@ -224,6 +227,57 @@ void get_entry(Json::Value *passdb, std::string request)
     }
 }
 
+/* pre: takes in a Json::Value* passdb
+ * post: prints out all entries (Service, Username, Note)
+ */
+void list(Json::Value *passdb)
+{
+    Json::Value::iterator it;
+    Json::StreamWriterBuilder builder;
+    std::string request;
+
+    it = (*passdb)["dbentry"].begin();
+    for (; it != (*passdb)["dbentry"].end(); it++)
+    {
+        //this gets the key from the iterator, but returns it in quotes
+        request = Json::writeString(builder, it.key());
+
+        //this removes the quotes
+        request.erase(remove(request.begin(), request.end(), '\"'), request.end());
+
+        print_entry(passdb, request);
+    }
+}
+
+/* pre: takes in a Json::Value* passdb and a std::string request
+post: prints the password for the requested service and username
+*/
+void printpw(Json::Value *passdb, std::string request)
+{
+  std::string pass;
+
+  if ((*passdb)["dbentry"].isMember(request))
+    {
+        pass = (*passdb)["dbentry"][request]["password"].asString();
+        std::cout << pass << std::endl;
+    }
+    else
+        std::cout << "Entry doesn't exist!" << std::endl;
+}
+
+/* pre: takes in int argc and std::vector<std::string> argv, the first item of
+ *      argv MUST be 'print'
+ * post: parses the command saved in argv and runs the appropriate function if
+ *      one exists
+*/
+void parse_print(int argc, std::vector<std::string> argv)
+{
+    if (argc == 3)
+        printpw(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
+    else
+        std::cout << "usage: print [<service> <username>]" << std::endl;
+}
+
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
  *      argv MUST be 'get'
  * post: parses the command saved in argv and runs the appropriate function if
@@ -234,7 +288,7 @@ void parse_get(int argc, std::vector<std::string> argv)
     if (argc == 3) /* prg get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
     else if (argc == 1) /* prg get */
-        get_entry(&passdb, "");
+        list(&passdb);
     else
         std::cout << "usage: get [<service> <username>]" << std::endl;
 }
@@ -265,7 +319,7 @@ void clip(Json::Value *passdb, std::string request)
                   << std::endl
                   << "Press enter to overwrite clipboard."
                   << std::endl;
-        
+
         std::getline(std::cin, pass);
         pass = "echo -n \" \" | xclip -selection clipboard";
         system((const char*)pass.c_str());
@@ -615,6 +669,10 @@ bool parse_command(int argc, std::vector<std::string> argv)
         parse_add(argc, argv);
     else if (argv[0] == "get") /* else if 'get' is the user's command */
         parse_get(argc, argv);
+    else if (argv[0] == "list")
+        list(&passdb);
+    else if (argv[0] == "print")
+        parse_print(argc, argv);
     else if (argv[0] == "clip")
         parse_clip(argc, argv);
     else if (argv[0] == "delete")
