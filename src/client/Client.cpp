@@ -270,7 +270,7 @@ void parse_get(int argc, std::vector<std::string> argv)
 
     if (argc == 3) /* get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
-    else if (argc == 2) /* get numRef */
+    else if (argc == 2 && is_number(argv[1])) /* get numRef */
     {
         if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
             get_entry(&passdb, numRef);
@@ -387,7 +387,7 @@ void parse_clip(int argc, std::vector<std::string> argv)
 
     if (argc == 3) //clip service username
         clip(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
-    else if (argc == 2) //clip numRef
+    else if (argc == 2 && is_number(argv[1])) //clip numRef
     {
         if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
             clip(&passdb, numRef);
@@ -411,17 +411,6 @@ int delete_entry(Json::Value *passdb, std::string request)
     }
     else
         return 1;
-}
-
-/* pre: takes in string
- * post: return if the string is a number
- * return: 1 on number characters; 0 on non-digit characters
- */
-bool is_number(const std::string& s)
-{
-	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it)) ++it;
-	return !s.empty() && it == s.end();
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -541,7 +530,7 @@ void parse_edit(int argc, std::vector<std::string> argv)
             std::cout << "No such entry, please check your input" << std::endl;
         }
     }
-    else if (argc == 2)
+    else if (argc == 2 && is_number(argv[1]))
     {
         if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
         {
@@ -778,7 +767,8 @@ bool parse_command(int argc, std::vector<std::string> argv)
         parse_add(argc, argv);
     else if (argv[0] == "get" ||
             argv[0] == "list" ||
-            argv[0] == "print")
+            argv[0] == "print" ||
+             argv[0] == "ls")
         parse_get(argc, argv);
     else if (argv[0] == "search")
         parse_search(argc, argv);

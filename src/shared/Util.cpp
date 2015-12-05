@@ -1,5 +1,18 @@
 #include "keylocker.h"
 
+
+/* pre: takes in string
+ * post: return if the string is a number
+ * return: 1 on number characters; 0 on non-digit characters
+ */
+bool is_number(const std::string& s)
+{
+	std::string::const_iterator it = s.begin();
+	while (it != s.end() && std::isdigit(*it)) ++it;
+	return !s.empty() && it == s.end();
+}
+
+
 /* pre: takes in a std::string question and std::string ans_default which MUST
  *      be either 'yes' or 'no'
  * post: prompts the user with question followed by a (yes/no) string which will
