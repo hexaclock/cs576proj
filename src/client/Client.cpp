@@ -11,6 +11,9 @@ of specified length (or prompts user for password if length was 0 or not include
 key: '<service>_<username>' from the database if they were provided,\
 else returns a list of all entries. Reports error message if no such key exists.\
 \n\t'list [<service> <username>]':\tList is an alias for 'get'.\
+\n\t'print [<service> <username>]':\tPrint is an alias for 'get'.\
+\n\t'search <pattern>':\tRetrieves all entries that contain pattern in either \
+their service, username or notes fields.\
 \n\t'clip <service> <username>':\tCopies the password for key: '<service>_<username>' \
 to the clipboard if the entry exists. Requires X window manager / xclip. \
 \n\t'edit <service> <username>':\tEdits an existing entry for key: \
@@ -672,7 +675,9 @@ bool parse_command(int argc, std::vector<std::string> argv)
         return true;
     else if (argv[0] == "add")
         parse_add(argc, argv);
-    else if (argv[0] == "get"|| argv[0] == "list")
+    else if (argv[0] == "get" ||
+            argv[0] == "list" ||
+            argv[0] == "print")
         parse_get(argc, argv);
     else if (argv[0] == "search")
         parse_search(argc, argv);

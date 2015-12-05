@@ -16,6 +16,8 @@ Our password manager for CS576.
 
 `list [<service> <username>]`:   List is an alias for `get`.
 
+`print [<service> <username>]`:   Print is also an alias for `get`.
+
 `search <pattern>`:    Retrieves all entries that contain the string `pattern` in either their "service", "username" or "notes" fields.
 
 `clip <service> <username>`:	Copies the password for key: `<service>_<username>` to the clipboard if the entry exists, then overwrites the clipboard. Requires X window manager / xclip.
