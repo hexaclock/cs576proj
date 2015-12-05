@@ -14,6 +14,12 @@ Our password manager for CS576.
 
 `get [<service> <username>]`:    Retrieves the entry for key: `<service>_<username>` from the database if they were provided, else returns a list of all entries. Reports error message if no such key exists.
 
+`list [<service> <username>]`:   List is an alias for `get`.
+
+`print [<service> <username>]`:   Print is also an alias for `get`.
+
+`search <pattern>`:    Retrieves all entries that contain the string `pattern` in either their "service", "username" or "notes" fields.
+
 `clip <service> <username>`:	Copies the password for key: `<service>_<username>` to the clipboard if the entry exists, then overwrites the clipboard. Requires X window manager / xclip.
 
 `edit <service> <username>`:	 Edits an existing entry for key: `<service>_<username>` with new values provided by user. Reports error message if no such key exists.

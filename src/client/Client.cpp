@@ -10,6 +10,10 @@ of specified length (or prompts user for password if length was 0 or not include
 \n\t'get [<service> <username>]':\tRetrieves the entry for \
 key: '<service>_<username>' from the database if they were provided,\
 else returns a list of all entries. Reports error message if no such key exists.\
+\n\t'list [<service> <username>]':\tList is an alias for 'get'.\
+\n\t'print [<service> <username>]':\tPrint is an alias for 'get'.\
+\n\t'search <pattern>':\tRetrieves all entries that contain pattern in either \
+their service, username or notes fields.\
 \n\t'clip <service> <username>':\tCopies the password for key: '<service>_<username>' \
 to the clipboard if the entry exists. Requires X window manager / xclip. \
 \n\t'edit <service> <username>':\tEdits an existing entry for key: \
@@ -163,11 +167,13 @@ void parse_add(int argc, std::vector<std::string> argv)
         add_entry(&passdb, 0);
 }
 
-/* pre: takes in a Json::Value* passdb and an std::string dbentry_key
+/* pre: takes in a Json::Value* passdb an std::string dbentry_key and a boolean
+ *      show_pass
  * post: prints out the dbentry in the keylocker database pointed to by passdb
- *      that has the key dbentry_key
+ *      that has the key dbentry_key, if show_pass is true, prints the password
+ *      in plaintext, else prints a string of *'s
  */
-void print_entry(Json::Value *passdb, std::string dbentry_key)
+void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass)
 {
     Json::Value val;
     Json::StreamWriterBuilder builder;
@@ -179,8 +185,13 @@ void print_entry(Json::Value *passdb, std::string dbentry_key)
     val = (*passdb)["dbentry"][dbentry_key]["username"];
     line += "\n\tUsername:\t" + Json::writeString(builder, val);
 
-    val = (*passdb)["dbentry"][dbentry_key]["password"];
-    line += "\n\tPassword:\t" + Json::writeString(builder, val);
+    if (show_pass)
+    {
+        val = (*passdb)["dbentry"][dbentry_key]["password"];
+        line += "\n\tPassword:\t" + Json::writeString(builder, val);
+    }
+    else
+        line += "\n\tPassword:\t*****";
 
     val = (*passdb)["dbentry"][dbentry_key]["notes"];
     line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
@@ -197,14 +208,10 @@ void get_entry(Json::Value *passdb, std::string request)
     Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
 
-    //This line was recommended on the internet but I don't think it changes
-    //  output
-    //builder.settings_["indentation"] = "";
-
     if (!request.empty()) /* get where key=request */
     {
         if ((*passdb)["dbentry"].isMember(request))
-            print_entry(passdb, request);
+            print_entry(passdb, request, true); //show passwords when requesting a specific entry
         else
             panic("No such entry, please check your input", 2);
     }
@@ -219,24 +226,79 @@ void get_entry(Json::Value *passdb, std::string request)
             //this removes the quotes
             request.erase(remove(request.begin(), request.end(), '\"'), request.end());
 
-            print_entry(passdb, request);
+            print_entry(passdb, request, false); //don't show passwords when printing the whole list
         }
     }
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
- *      argv MUST be 'get'
+ *      argv MUST be 'get' or 'list'
  * post: parses the command saved in argv and runs the appropriate function if
  *      one exists
  */
 void parse_get(int argc, std::vector<std::string> argv)
 {
-    if (argc == 3) /* prg get service username */
+    if (argc == 3) /* get service username */
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
-    else if (argc == 1) /* prg get */
+    else if (argc == 1) /* get */
         get_entry(&passdb, "");
     else
         std::cout << "usage: get [<service> <username>]" << std::endl;
+}
+
+/* pre: takes in a Json::Value* passdb and a std::string pattern
+ * post: if pattern is not empty prints out the keylocker database entries that
+ *      match the pattern
+ */
+void search(Json::Value *passdb, std::string pattern)
+{
+    Json::Value val;
+    Json::Value::iterator it;
+    Json::StreamWriterBuilder builder;
+    std::string key;
+    std::string service;
+    std::string username;
+    std::string notes;
+
+    if (pattern.empty())
+        return;
+
+    it = (*passdb)["dbentry"].begin();
+    for (; it != (*passdb)["dbentry"].end(); it++)
+    {
+        key = Json::writeString(builder, it.key());
+        key.erase(remove(key.begin(), key.end(), '\"'), key.end());
+
+        val = (*passdb)["dbentry"][key]["service"];
+        service = Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][key]["username"];
+        username = Json::writeString(builder, val);
+
+        val = (*passdb)["dbentry"][key]["notes"];
+        notes = Json::writeString(builder, val);
+
+        if (service.find(pattern) != std::string::npos ||
+                username.find(pattern) != std::string::npos ||
+                notes.find(pattern) != std::string::npos)
+        {
+            print_entry(passdb, key, false);
+            continue;
+        }
+    }
+}
+
+/* pre: takes in int argc and std::vector<std::string> argv, the first item of
+ *      argv MUST be 'search'
+ * post: parses the command saved in argv and runs the appropriate function if
+ *      one exists
+ */
+void parse_search(int argc, std::vector<std::string> argv)
+{
+    if (argc != 2)
+        std::cout << "usage: search <pattern>" << std::endl;
+    else
+        search(&passdb, argv[1]);
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -265,7 +327,7 @@ void clip(Json::Value *passdb, std::string request)
                   << std::endl
                   << "Press enter to overwrite clipboard."
                   << std::endl;
-        
+
         std::getline(std::cin, pass);
         pass = "echo -n \" \" | xclip -selection clipboard";
         system((const char*)pass.c_str());
@@ -467,7 +529,7 @@ void parse_chpass(int argc, std::vector<std::string> argv)
                 }
                 else
                     std::cout << std::endl << "Password updated successfully" << std::endl;
-                
+
             }
             else
             {
@@ -505,7 +567,7 @@ int timestamp_cmp()
 
     reqType = "TIMESTAMP";
     data = reqType + ":" + srvuname + ":" + secretKey + ":" + std::to_string(modtime) + "\n";
-    
+
     int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
 
     return ret;
@@ -611,10 +673,14 @@ bool parse_command(int argc, std::vector<std::string> argv)
 {
     if (argc == 0)
         return true;
-    else if (argv[0] == "add") /*if 'add' is the user's command*/
+    else if (argv[0] == "add")
         parse_add(argc, argv);
-    else if (argv[0] == "get") /* else if 'get' is the user's command */
+    else if (argv[0] == "get" ||
+            argv[0] == "list" ||
+            argv[0] == "print")
         parse_get(argc, argv);
+    else if (argv[0] == "search")
+        parse_search(argc, argv);
     else if (argv[0] == "clip")
         parse_clip(argc, argv);
     else if (argv[0] == "delete")
@@ -750,7 +816,7 @@ int main()
                     std::cout << "Invalid port"
                               << std::endl;
             } while (!validate_portnum(srvport));
-            
+
             do
             {
                 std::cout << "Server username: ";
@@ -772,7 +838,7 @@ int main()
             n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
             if (n != 0)
             {
-                std::cout << "Failed to download database from server" 
+                std::cout << "Failed to download database from server"
                           << std::endl;
                 exit(-4);
             }
@@ -873,10 +939,10 @@ int main()
     {
         std::cout << "Invalid server username in database file!" << std::endl;
         exit(3);
-    }    
+    }
 
     int tscheck = timestamp_cmp();
-    
+
     if (tscheck == -1)
     {
         std::cout << "Server is offline. Continuing in offline mode." << std::endl;
