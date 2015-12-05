@@ -45,8 +45,22 @@ std::string dbname; //name of the local database file
 std::string dbpath; //path to the local database file
 std::string dbpass; //password for the local database file
 std::string kldir; //directory for keylocker files
+std::string logfile; //local keylocker log file
 Json::Value passdb; //the local database root
 std::vector<std::string> numRefs; //interactive number references for entries
+
+/* pre: takes in action
+ * post: write information into log file, we use append mode
+ * log format: username | action | date
+ */
+void logger(const std::string action)
+{
+	time_t now = time(0);
+	char *date = ctime(&now);
+	std::ofstream log(logfile, std::ios_base::app | std::ios_base::out);
+	log << username << " | " << action << " | " << date;
+	log.close();
+}
 
 /* pre: takes in an std::string msg and int code
  * post: prints msg to stdout and exits with error code code
@@ -170,6 +184,7 @@ void add_entry(Json::Value *passdb, int randlen)
         (*passdb)["dbentry"][entry]["password"] = password;
         (*passdb)["dbentry"][entry]["notes"] = notes;
     }
+	logger("add " + entry);
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -222,6 +237,8 @@ void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass, i
     line += "\n\tNotes:\t\t" + Json::writeString(builder, val);
 
     std::cout << line << std::endl;
+
+	logger("print entry");
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -240,6 +257,7 @@ void get_entry(Json::Value *passdb, std::string request)
             print_entry(passdb, request, true, 0); //show passwords when requesting a specific entry
         else
             std::cout << "No such entry, please check your input" << std::endl;
+		logger("get " + request);
     }
     else /* get all */
     {
@@ -374,6 +392,7 @@ void clip(Json::Value *passdb, std::string request)
     }
     else
         std::cout << "Entry doesn't exist!" << std::endl;
+	logger("clip " + request); 
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -407,6 +426,7 @@ int delete_entry(Json::Value *passdb, std::string request)
     if ((*passdb)["dbentry"].isMember(request))
     {
         (*passdb)["dbentry"].removeMember(request);
+		logger("delete " + request);
         return 0;
     }
     else
@@ -502,6 +522,7 @@ int update_entry(Json::Value *passdb, std::string request)
         (*passdb)["dbentry"][entry]["password"] = password;
         (*passdb)["dbentry"][entry]["notes"] = notes;
 
+		logger("update " + request);
         return 0;
     }
     else
@@ -583,6 +604,7 @@ void parse_chpass(int argc, std::vector<std::string> argv)
     std::string confirmnewpass;
     int ret;
 
+	logger("change password");
     if (checkpass(dbpass))
     {
         std::cout << std::endl << "New password: ";
@@ -684,6 +706,7 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
         data = reqType + ":" + srvuname + ":" + secretKey + "\n";
         if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
             std::cout<<"Failed to register with server. User may already exist."<<std::endl;
+		logger("register to the server");
     }
     else if (argv[0] == "download")
     {
@@ -691,6 +714,7 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
         data = reqType + ":" + srvuname + ":" + secretKey + "\n";
         if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
             std::cout<<"Failed to download database"<<std::endl;
+		logger("download database from server");
     }
     else if (argv[0] == "upload")
     {
@@ -717,6 +741,7 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
 
         if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
             std::cout<<"Failed to upload database to server"<<std::endl;
+		logger("upload local database");
     }
 }
 
@@ -887,6 +912,9 @@ int main()
     dbpath = kldir + "/" + dbname;
 
     newfile = !local_db_exists(kldir,dbpath);
+
+	//log file name
+	logfile = kldir + "/" + "logfile.txt";
 
     if (newfile)
     {
