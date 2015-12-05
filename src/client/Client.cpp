@@ -197,10 +197,6 @@ void get_entry(Json::Value *passdb, std::string request)
     Json::Value::iterator it;
     Json::StreamWriterBuilder builder;
 
-    //This line was recommended on the internet but I don't think it changes
-    //  output
-    //builder.settings_["indentation"] = "";
-
     if (!request.empty()) /* get where key=request */
     {
         if ((*passdb)["dbentry"].isMember(request))
@@ -265,7 +261,7 @@ void clip(Json::Value *passdb, std::string request)
                   << std::endl
                   << "Press enter to overwrite clipboard."
                   << std::endl;
-        
+
         std::getline(std::cin, pass);
         pass = "echo -n \" \" | xclip -selection clipboard";
         system((const char*)pass.c_str());
@@ -467,7 +463,7 @@ void parse_chpass(int argc, std::vector<std::string> argv)
                 }
                 else
                     std::cout << std::endl << "Password updated successfully" << std::endl;
-                
+
             }
             else
             {
@@ -505,7 +501,7 @@ int timestamp_cmp()
 
     reqType = "TIMESTAMP";
     data = reqType + ":" + srvuname + ":" + secretKey + ":" + std::to_string(modtime) + "\n";
-    
+
     int ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
 
     return ret;
@@ -750,7 +746,7 @@ int main()
                     std::cout << "Invalid port"
                               << std::endl;
             } while (!validate_portnum(srvport));
-            
+
             do
             {
                 std::cout << "Server username: ";
@@ -772,7 +768,7 @@ int main()
             n = tls_send(srvname, atoi(srvport.c_str()), data, dbpath);
             if (n != 0)
             {
-                std::cout << "Failed to download database from server" 
+                std::cout << "Failed to download database from server"
                           << std::endl;
                 exit(-4);
             }
@@ -873,10 +869,10 @@ int main()
     {
         std::cout << "Invalid server username in database file!" << std::endl;
         exit(3);
-    }    
+    }
 
     int tscheck = timestamp_cmp();
-    
+
     if (tscheck == -1)
     {
         std::cout << "Server is offline. Continuing in offline mode." << std::endl;
