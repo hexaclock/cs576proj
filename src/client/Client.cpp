@@ -10,6 +10,7 @@ of specified length (or prompts user for password if length was 0 or not include
 \n\t'get [<service> <username>]':\tRetrieves the entry for \
 key: '<service>_<username>' from the database if they were provided,\
 else returns a list of all entries. Reports error message if no such key exists.\
+\n\t'list [<service> <username>]':\tList is an alias for 'get'.\
 \n\t'clip <service> <username>':\tCopies the password for key: '<service>_<username>' \
 to the clipboard if the entry exists. Requires X window manager / xclip. \
 \n\t'edit <service> <username>':\tEdits an existing entry for key: \
@@ -221,7 +222,7 @@ void get_entry(Json::Value *passdb, std::string request)
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
- *      argv MUST be 'get'
+ *      argv MUST be 'get' or 'list'
  * post: parses the command saved in argv and runs the appropriate function if
  *      one exists
  */
@@ -607,9 +608,9 @@ bool parse_command(int argc, std::vector<std::string> argv)
 {
     if (argc == 0)
         return true;
-    else if (argv[0] == "add") /*if 'add' is the user's command*/
+    else if (argv[0] == "add")
         parse_add(argc, argv);
-    else if (argv[0] == "get") /* else if 'get' is the user's command */
+    else if (argv[0] == "get"|| argv[0] == "list")
         parse_get(argc, argv);
     else if (argv[0] == "clip")
         parse_clip(argc, argv);
