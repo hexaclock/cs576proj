@@ -86,7 +86,7 @@ void showterm()
  */
 std::string get_numRef(int n)
 {
-    if (!numRefs.empty() && n > 0 && (unsigned long)n < numRefs.size())
+    if (!numRefs.empty() && n >= 0 && (unsigned long)n < numRefs.size())
         return numRefs.at(n);
     else
         return "";
