@@ -42,6 +42,11 @@
     long = certificate authority
 }
 
+\DeclareAcronym{AES-GCM}{%
+    short = AES-GCM,
+    long = advanced encryption standard Galois/counter mode
+}
+
 
 % The document actually starts here
 \begin{document}
@@ -58,18 +63,18 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 \smallskip
 \noindent(1) Current requirements
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item \textbf{(A) }Ability for users to store their usernames/passwords/other confidential information in a secure manner.
-\item \textbf{(A) }Ability for users to be able to securely access and retrieve any previously stored data.
-\item \textbf{(A) }Offline, read-only copy of a user's sensitive information that can be downloaded at will.
-\item \textbf{(B) }An easy-to-use password generation utility that produces and saves cryptographically-strong passwords to the database.
-\item \textbf{(B) }The system should have an administrative user account that only has access to functionality- necessary to maintain the database (adding and removing users, etc.). The administrative user shall have no access to the private data of others.
-\item \textbf{(B) }Audit logging: Each time a password is viewed, edited, or deleted the system will record the time and a log of the operation.
-\item \textbf{(B) }Lock an account once a user-configurable number of authentication failures is reached within a user-configurable time period.
-\item \textbf{(B) }Prompt for the creation of a new password (client-side) for new users if they do not have one already.
-\item \textbf{(C) }A \ac{GUI} in order to make the system easier to use. The system will be \ac{CLI}-driven otherwise.
-\item \textbf{(C) }Multi-factor authentication. Should a user's private key be compromised, it will still be difficult for an attacker to be able to download a copy of the victim's data.
-\item \textbf{(C) }In the event a user wishes to cease using the system, it would be nice to have a feature to delete their account and all associated data from the server.
-\item \textbf{(C) }Allow user to change their master password.
+    \item \textbf{(A) }Ability for users to store their usernames/passwords/other confidential information in a secure manner.
+    \item \textbf{(A) }Ability for users to be able to securely access and retrieve any previously stored data.
+    \item \textbf{(A) }Offline, read-only copy of a user's sensitive information that can be downloaded at will.
+    \item \textbf{(B) }An easy-to-use password generation utility that produces and saves cryptographically-strong passwords to the database.
+    \item \textbf{(B) }The ability to copy passwords to the system clipboard for easy use.
+    \item \textbf{(B) }Audit logging: Each time a password is viewed, edited, or deleted the system will record the time and a log of the operation.
+    \item \textbf{(B) }Lock an account once a user-configurable number of authentication failures is reached within a user-configurable time period.
+    \item \textbf{(B) }Prompt for the creation of a new password (client-side) for new users if they do not have one already.
+    \item \textbf{(C) }A \ac{GUI} in order to make the system easier to use. The system will be \ac{CLI}-driven otherwise.
+    \item \textbf{(C) }Multi-factor authentication. Should a user's private key be compromised, it will still be difficult for an attacker to be able to download a copy of the victim's data.
+    \item \textbf{(C) }In the event a user wishes to cease using the system, it would be nice to have a feature to delete their account and all associated data from the server.
+    \item \textbf{(C) }Allow user to change their master password.
 \end{itemize}
 \smallskip
 \noindent(2) Modification
@@ -95,40 +100,40 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 \smallskip
 \indent(B) Requirements to the threat analysis
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item Do not allow users to access other users’ personal information.
-\item User will be warned to delete the temporary password file after retrieving operation.
-\item Use AES-GCM (allows for built-in authenticated encryption) in order to encrypt data using a user’s secret key.
-\item Symmetric keys used to encrypt actual data are never to be stored in plaintext. They must first be encrypted by a user’s public key, and then stored.
-\item There should be a \ac{TLS} tunnel between the server and client at all times. This tunnel will be negotiated using the server’s public key, preventing any further access should a client become compromised. In addition, \ac{SSL}/\ac{TLS} provides an integrity guarantee for data in transit, and prevents the possibility of replay attacks.
+    \item Do not allow users to access other users’ personal information.
+    \item User will be warned to delete the temporary password file after retrieving operation.
+    \item Use \ac{AES-GCM} (which allows for built-in authenticated encryption).
+    \item There should be a \ac{TLS} tunnel between the server and client at all times. This tunnel will be negotiated using the server’s public key, preventing any further access should a client become compromised. In addition, \ac{SSL}/\ac{TLS} provides an integrity guarantee for data in transit, and prevents the possibility of replay attacks.
 \end{itemize}
 
 \noindent(2) Threat Model
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item We assume that users will be careful in the handling and storage of their respective private keys. If this is indeed the case, the system should be secure against any attacker that does not resort to legal/non-technical means of compromising the system by way of coercing a user or users to divulge their private keys. The server itself is effectively a “no-knowledge” participant --- should the data on the server be compromised/stolen, there will be no breaks in the confidentiality of that data.
-\item By using today’s standard public-key cryptosystems based on mathematical primitives such as the discrete logarithm problem and the inherent hardness in factoring large numbers into their primes using today’s technology, we assume that a potential attacker does not have access to a quantum computer that successfully implements Shor’s algorithm. We also make the assumption that the attacker has not found any other groundbreaking vulnerabilities in either symmetric or asymmetric cryptosystems.
-\item Naturally, we assume that a client’s system has not been compromised (i.e.\ there are no hardware or operating system level backdoors that leak data to a third party). As we are gearing the system towards use on a Linux-based distribution, there is a lower probability that the operating system or kernel silently leaks data to a potentially evil organization.
-\item If the system is to be used internally (in an organization), we assume that the internal certificate authority has not been compromised. Similarly, we assume the same for users who wish to use the public KeyLocker service --- no root \ac{CA} is compromised and issuing false certificates for the domain on which the KeyLocker server is hosted.
-\item We assume whoever implements this system in their organization follows best practices in assuring availability and disaster recovery in the case that a piece of hardware fails.
+    \item We assume that users will be careful in the handling and storage of their respective private keys. If this is indeed the case, the system should be secure against any attacker that does not resort to legal/non-technical means of compromising the system by way of coercing a user or users to divulge their private keys. The server itself is effectively a “no-knowledge” participant --- should the data on the server be compromised/stolen, there will be no breaks in the confidentiality of that data.
+    \item By using today’s standard public-key cryptosystems based on mathematical primitives such as the discrete logarithm problem and the inherent hardness in factoring large numbers into their primes using today’s technology, we assume that a potential attacker does not have access to a quantum computer that successfully implements Shor’s algorithm. We also make the assumption that the attacker has not found any other groundbreaking vulnerabilities in either symmetric or asymmetric cryptosystems.
+    \item Naturally, we assume that a client’s system has not been compromised (i.e.\ there are no hardware or operating system level backdoors that leak data to a third party). As we are gearing the system towards use on a Linux-based distribution, there is a lower probability that the operating system or kernel silently leaks data to a potentially evil organization.
+    \item If the system is to be used internally (in an organization), we assume that the internal certificate authority has not been compromised. Similarly, we assume the same for users who wish to use the public KeyLocker service --- no root \ac{CA} is compromised and issuing false certificates for the domain on which the KeyLocker server is hosted.
+    \item We assume whoever implements this system in their organization follows best practices in assuring availability and disaster recovery in the case that a piece of hardware fails.
 \end{itemize}
 
 \DesignSection{PART II Implementation}
 \noindent1. Alpha System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-        \item Basic functionality. Secure, per-user data storage. No \ac{TLS} tunnel between the server and client is necessary at this stage.
-\item Add/register new users in the system.
-\item Add/delete/edit entries.
-\item Support for an offline, read-only copy of a user’s personal password database.
-\item Support for password-based encryption.
+    \item Basic functionality. Secure, per-user data storage. No \ac{TLS} tunnel between the server and client is necessary at this stage.
+    \item Add/register new users in the system.
+    \item Add/delete/edit entries.
+    \item Support for an offline, read-only copy of a user’s personal password database.
+    \item Support for password-based encryption.
 \end{itemize}
 \noindent2. Beta System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item Add syncing from client to a server.
-\item Add password generation.
+    \item Add syncing from client to a server.
+    \item Add password generation.
 \end{itemize}
 \noindent3. Final System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item \ac{TLS} tunneling will be fully implemented.
-\item Possibly add the “nice to have” features depending on time constraints.
+    \item \ac{TLS} tunneling will be fully implemented.
+    \item Add system clipboard functionality.
+    \item Possibly add the “nice to have” features depending on time constraints.
 \end{itemize}
 
 \DesignSection{PART III Evaluation Plan}
