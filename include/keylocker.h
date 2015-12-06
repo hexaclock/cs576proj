@@ -85,4 +85,5 @@ int tls_send(std::string &hostname, int portnum,
 bool prompt_y_n(std::string question, std::string ans_default);
 bool is_number(const std::string& s);
 bool isValidInput(const std::string &input);
+int isSecurePassword(const std::string &password);
 #endif

@@ -84,3 +84,25 @@ bool isValidInput(const std::string &input)
 	}
 	return true;
 }
+
+/* pre: takes in the input password
+ * return: 0 for secure; 1 for illegal length; 2 for simple combination
+ */
+int isSecurePassword(const std::string &password)
+{
+    int number = 0, lowerCase = 0, upperCase = 0;
+	if (password.size() < 8 || password.size() > 24)
+		return 1;
+	for (int i = 0; i < (int)password.size(); i++)
+	{
+		if ( password[i] >= '0' && password[i] <= '9' )
+			number = 1;
+		else if ( password[i] >= 'A' && password[i] <= 'Z')
+			upperCase = 4;
+		else if ( password[i] >= 'a' && password[i] <= 'z')
+			lowerCase = 2;
+		if ((number ^ lowerCase ^ upperCase) == 7)
+			return 0;
+	}
+    return 2;
+}

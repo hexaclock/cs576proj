@@ -186,6 +186,7 @@ void add_entry(Json::Value *passdb, int randlen)
 				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
 			std::cin.sync();
 		} while (!isValidInput(password));
+		std::cout << std::endl;
     }
 
     entry = service + "_" + username;
@@ -647,17 +648,28 @@ void parse_chpass(int argc, std::vector<std::string> argv)
 		} while (!isValidInput(newpass));
 		std::cout << std::endl;
 
-        do
+		int temp = isSecurePassword(newpass);
+		while (temp != 0)
 		{
-			std::cout << "Retype new password: ";
+			if (temp == 1)
+				std::cout << "The length should range from 8 to 24" << std::endl;
+			else if(temp == 2)
+				std::cout << "Password must contains at least 1 number, 1 uppercase character and 1 lowercase character" << std::endl;
+			std::cout << "New database password: ";
 			hideterm();
-			std::getline(std::cin, confirmnewpass);
+			std::getline(std::cin, newpass);
 			showterm();
-			if (!isValidInput(confirmnewpass))
-				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
 			std::cin.sync();
-		} while (!isValidInput(confirmnewpass));
-        std::cout << std::endl;
+			std::cout << std::endl;
+			temp = isSecurePassword(newpass);
+		}
+
+		std::cout << "Retype new password: ";
+		hideterm();
+		std::getline(std::cin, confirmnewpass);
+		showterm();
+		std::cin.sync();
+		std::cout << std::endl;
 
         if (newpass == confirmnewpass)
         {
@@ -1021,8 +1033,25 @@ int main()
 				showterm();
 				if (!isValidInput(dbpass))
 					std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+				std::cin.sync();
 			} while (!isValidInput(dbpass));
 		    std::cout << std::endl;
+			
+			int temp = isSecurePassword(dbpass); 
+		    while (temp != 0)	
+			{
+				if (temp == 1)
+					std::cout << "The length should range from 8 to 24" << std::endl;
+				else if(temp == 2)
+					std::cout << "Password must contains at least 1 number, 1 uppercase character and 1 lowercase character" << std::endl;
+				std::cout << "New database password: ";
+				hideterm();
+				std::getline(std::cin, dbpass);
+				showterm();
+				std::cin.sync();
+				std::cout << std::endl;
+				temp = isSecurePassword(dbpass);
+			} 
 			do
 			{
 				std::cout << "Server hostname: ";
