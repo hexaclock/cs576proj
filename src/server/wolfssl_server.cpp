@@ -365,14 +365,22 @@ void process_data(const std::string &data, const std::string &dbpath, WOLFSSL *s
         if (cmdparts.size() == 4)
         {
             if (!update_file(user,b64dat))
-                std::cout<<"[-] Failed to update "<<user<<"'s"<<" database"<<std::endl;
+			{
+				std::cout<<"[-] Failed to update "<<user<<"'s"<<" database"<<std::endl;
+				reply = 0;
+			}
             else
+			{
                 std::cout<<"[+] Updated "<<user<<"'s"<<" database"<<std::endl;
+				reply = 1;
+			}
         }
         else
         {
             std::cout<<"[-] Client sent an invalid command"<<std::endl;
         }
+		if (wolfSSL_write(sslconn, &reply, sizeof(char)) != sizeof(char))
+			std::cout<< "[-] " << "Failed to notify client of chpass status" << std::endl;    
     }
 
     /* client wishes to download their database */

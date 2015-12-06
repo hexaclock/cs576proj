@@ -30,10 +30,8 @@ bool regist (WOLFSSL* ssl, std::string &data)
 
 bool upload (WOLFSSL* ssl, std::string &data)
 {
-    char rcvBuf[MAXDATASIZE] = {0};
+	char success = 0;
     int ret = 0;
-
-    //strcpy(sendBuf, data.c_str());
 
     if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
     {
@@ -42,14 +40,16 @@ bool upload (WOLFSSL* ssl, std::string &data)
         return false;
     }
 
-    if (wolfSSL_read(ssl, rcvBuf, MAXDATASIZE-1) < 0)
+    if (wolfSSL_read(ssl, &success, MAXDATASIZE-1) < 0)
     {
         ret = wolfSSL_get_error(ssl, 0);
         std::cout << "WolfSSL read error. Error: " << ret << std::endl;
     }
-    //std::cout << "Received: " << rcvBuf << std::endl;
 
-    return true;
+	if (success)
+		return true;
+	else
+		return false;
 }
 
 /* pre:  pass request data; pass the path of database (~/.keyloker)
@@ -67,9 +67,6 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
     std::string delimiter = ":";
     std::string srvresponse;
     std::string b64dat;
-
-
-    //strcpy(sendBuf, data.c_str());
 
     if (wolfSSL_write(ssl, data.c_str(), data.size()) != (int)data.size())
     {
@@ -94,8 +91,6 @@ bool download (WOLFSSL* ssl, std::string &data, std::string &dbpath)
         }
     } while (nread > 0);
 
-    //std::cout << "Message received" <<std::endl;
-    //std::string rcv = rcvBuf;
     b64dat = srvresponse.substr(srvresponse.find_last_of(delimiter) + 1);
 
     if (b64dat.size() < 2)
