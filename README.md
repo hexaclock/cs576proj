@@ -4,7 +4,7 @@ Our password manager for CS576.
 ##Usage
 `./client` This starts an interactive prompt.
 
-`./server <port #> <certfile> <privkey> <userdb>` This starts the server.
+`./server <port #> <certfile> <privkey> [userdb]` This starts the server. If no user database (`userdb`) is specified, then the administrative user is prompted to create one.
 
 **Commands:**
 
