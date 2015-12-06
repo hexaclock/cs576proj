@@ -6,6 +6,8 @@
 \usepackage{tgbonum}
 \usepackage{textcomp}
 \usepackage{enumitem}
+\usepackage{acro}
+\usepackage{booktabs}
 \pagestyle{empty}
 \setlength{\tabcolsep}{0em}
 
@@ -13,6 +15,32 @@
 % defined macros
 \newcommand{\DesignSection}[1]
 {\noindent\textbf{#1}\\}
+
+% acronyms
+\DeclareAcronym{GUI}{%
+    short = GUI,
+    long = graphical user interface
+}
+
+\DeclareAcronym{CLI}{%
+    short = CLI,
+    long = command line interface
+}
+
+\DeclareAcronym{TLS}{%
+    short = TLS,
+    long = transport layer security
+}
+
+\DeclareAcronym{SSL}{%
+    short = SSL,
+    long = secure socket layer
+}
+
+\DeclareAcronym{CA}{%
+    short = CA,
+    long = certificate authority
+}
 
 
 % The document actually starts here
@@ -24,7 +52,7 @@
 
 \DesignSection{PART I Description}
 \noindent
-The primary purpose of KeyLocker is to allow users to easily and securely store their usernames, passwords, and other confidential information in an organized database. Rather than a master password run through a key-derivation function being used as the master key, KeyLocker only allows the use of an asymmetric key pair. In addition, users have the option to create “groups”, or shareable collections of password entries that can be accessed by anyone the owner (group administrator) grants permission to. All of a given user's private information that is stored in the system will be encrypted by the user's public key, and any groups will have encrypted copies of the symmetric “group key” associated with each user that has access to the group.
+The primary purpose of KeyLocker is to allow users to easily and securely store their usernames, passwords, and other confidential information in an organized database. Rather than a master password run through a key-derivation function being used as the master key, KeyLocker only allows the use of an asymmetric key pair. All of a given user's private information that is stored in the system will be encrypted by the user's public key.
 
 \DesignSection{1. Functional requirements}
 \smallskip
@@ -32,64 +60,61 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
 \item \textbf{(A) }Ability for users to store their usernames/passwords/other confidential information in a secure manner.
 \item \textbf{(A) }Ability for users to be able to securely access and retrieve any previously stored data.
-\item \textbf{(A) }An ACL-governed facility for password sharing between users of a deployment of the system.
 \item \textbf{(A) }Offline, read-only copy of a user's sensitive information that can be downloaded at will.
 \item \textbf{(B) }An easy-to-use password generation utility that produces and saves cryptographically-strong passwords to the database.
 \item \textbf{(B) }The system should have an administrative user account that only has access to functionality- necessary to maintain the database (adding and removing users, etc.). The administrative user shall have no access to the private data of others.
 \item \textbf{(B) }Audit logging: Each time a password is viewed, edited, or deleted the system will record the time and a log of the operation.
 \item \textbf{(B) }Lock an account once a user-configurable number of authentication failures is reached within a user-configurable time period.
 \item \textbf{(B) }Prompt for the creation of a new password (client-side) for new users if they do not have one already.
-\item \textbf{(C) }A GUI in order to make the system easier to use. The system will be CLI-driven otherwise.
+\item \textbf{(C) }A \ac{GUI} in order to make the system easier to use. The system will be \ac{CLI}-driven otherwise.
 \item \textbf{(C) }Multi-factor authentication. Should a user's private key be compromised, it will still be difficult for an attacker to be able to download a copy of the victim's data.
-\item \textbf{(C) }In the event a user wishes to cease using the system, it would be nice to have a feature to delete their account and all associated data from the server (including any groups that they may own).
+\item \textbf{(C) }In the event a user wishes to cease using the system, it would be nice to have a feature to delete their account and all associated data from the server.
 \item \textbf{(C) }Allow user to change their master password.
 \end{itemize}
 \smallskip
 \noindent(2) Modification
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item \textbf{(A) }User can manually copy and paste the retrieved password in GUI. Otherwise, the password will be stored into a temporary file. The user will be warned to delete this file after using the password. We will not offer auto filling function.
+    \item \textbf{(A) }User can manually copy and paste the retrieved password in the \ac{GUI}. Otherwise, the password will be stored into a temporary file. The user will be warned to delete this file after using the password. We will not offer auto filling function.
 \end{itemize}
 
 \DesignSection{2. Security requirements}
 \noindent(1) Current requirements\\
-\indent1) Threat matrix based on CIA model.
+\indent(A) Threat matrix based on CIA model.
 
 \setlength{\tabcolsep}{5pt}
 \indent\begin{tabular}{| c | c | c | c |}
-	\hline
-	  & Confidentiality & Integrity & Availability \\
-	\hline
-	User's personal info & High & Medium & Low \\
-	\hline
-	User's secret key & High & High & Low \\
-	\hline
-	Sharing info & Low & High & Medium \\
-	\hline
+    \toprule
+      & Confidentiality & Integrity & Availability \\
+    \midrule
+    User's personal info & High & Medium & Low \\
+    \midrule
+    User's secret key & High & High & Low \\
+    \bottomrule
 \end{tabular}
 
 \smallskip
-\indent2) Requirements to the thread analysis
+\indent(B) Requirements to the threat analysis
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
 \item Do not allow users to access other users’ personal information.
 \item User will be warned to delete the temporary password file after retrieving operation.
 \item Use AES-GCM (allows for built-in authenticated encryption) in order to encrypt data using a user’s secret key.
 \item Symmetric keys used to encrypt actual data are never to be stored in plaintext. They must first be encrypted by a user’s public key, and then stored.
-\item There should be a TLS tunnel between the server and client at all times. This tunnel will be negotiated using the server’s public key, preventing any further access should a client become compromised. In addition, SSL/TLS provides an integrity guarantee for data in transit, and prevents the possibility of replay attacks.
+\item There should be a \ac{TLS} tunnel between the server and client at all times. This tunnel will be negotiated using the server’s public key, preventing any further access should a client become compromised. In addition, \ac{SSL}/\ac{TLS} provides an integrity guarantee for data in transit, and prevents the possibility of replay attacks.
 \end{itemize}
 
 \noindent(2) Threat Model
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item We assume that users will be careful in the handling and storage of their respective private keys. If this is indeed the case, the system should be secure against any attacker that does not resort to legal/non-technical means of compromising the system by way of coercing a user or users to divulge their private keys. The server itself is effectively a “no-knowledge” participant - should the data on the server be compromised/stolen, there will be no breaks in the confidentiality of that data.
+\item We assume that users will be careful in the handling and storage of their respective private keys. If this is indeed the case, the system should be secure against any attacker that does not resort to legal/non-technical means of compromising the system by way of coercing a user or users to divulge their private keys. The server itself is effectively a “no-knowledge” participant --- should the data on the server be compromised/stolen, there will be no breaks in the confidentiality of that data.
 \item By using today’s standard public-key cryptosystems based on mathematical primitives such as the discrete logarithm problem and the inherent hardness in factoring large numbers into their primes using today’s technology, we assume that a potential attacker does not have access to a quantum computer that successfully implements Shor’s algorithm. We also make the assumption that the attacker has not found any other groundbreaking vulnerabilities in either symmetric or asymmetric cryptosystems.
-\item Naturally, we assume that a client’s system has not been compromised (i.e. there are no hardware or operating system level backdoors that leak data to a third party). As we are gearing the system towards use on a Linux-based distribution, there is a lower probability that the operating system or kernel silently leaks data to a potentially evil organization.
-\item If the system is to be used internally (in an organization), we assume that the internal certificate authority has not been compromised. Similarly, we assume the same for users who wish to use the public KeyLocker service - no root CA is compromised and issuing false certificates for the domain on which the KeyLocker server is hosted.
+\item Naturally, we assume that a client’s system has not been compromised (i.e.\ there are no hardware or operating system level backdoors that leak data to a third party). As we are gearing the system towards use on a Linux-based distribution, there is a lower probability that the operating system or kernel silently leaks data to a potentially evil organization.
+\item If the system is to be used internally (in an organization), we assume that the internal certificate authority has not been compromised. Similarly, we assume the same for users who wish to use the public KeyLocker service --- no root \ac{CA} is compromised and issuing false certificates for the domain on which the KeyLocker server is hosted.
 \item We assume whoever implements this system in their organization follows best practices in assuring availability and disaster recovery in the case that a piece of hardware fails.
 \end{itemize}
 
 \DesignSection{PART II Implementation}
 \noindent1. Alpha System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item Basic functionality. Secure, per-user data storage. No shared group functionality nor TLS tunnel between the server and client is necessary at this stage.
+        \item Basic functionality. Secure, per-user data storage. No \ac{TLS} tunnel between the server and client is necessary at this stage.
 \item Add/register new users in the system.
 \item Add/delete/edit entries.
 \item Support for an offline, read-only copy of a user’s personal password database.
@@ -98,13 +123,11 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 \noindent2. Beta System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
 \item Add syncing from client to a server.
-\item Begin adding shared groups and TLS tunneling at this stage.
 \item Add password generation.
 \end{itemize}
 \noindent3. Final System
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item Add support for ACLs.
-\item Shared groups and TLS tunneling will be fully implemented.
+\item \ac{TLS} tunneling will be fully implemented.
 \item Possibly add the “nice to have” features depending on time constraints.
 \end{itemize}
 
@@ -113,11 +136,9 @@ The primary purpose of KeyLocker is to allow users to easily and securely store 
 In order to ensure our program functions as intended, we propose a list of steps we will take to verify the implementation:
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
 \item Test that users must use the correct private key (corresponding to the public key) to login to the database.
-\item Test that all data being sent/received between the server and the client is actually encrypted and being sent via TLS.
+\item Test that all data being sent/received between the server and the client is actually encrypted and being sent via \ac{TLS}.
 \item Make sure that each time our system requests user input that it is validated.
-\item Verify shared group user access revocation, and subsequent re-encryption of the group with a new symmetric key as well as the server-housed ACL change.
-\item Ensure shared group database merging, if needed, works reliably (have multiple test users edit the database and save their changes).
-\item Evaluate the user interface (CLI, and, if implemented, the GUI) for ease-of-use and sensible design.
+\item Evaluate the user interface (\ac{CLI}, and, if implemented, the \ac{GUI}) for ease-of-use and sensible design.
 \item Try to edit/view user’s private data  entries using the database administrator account. These operations are considered invalid/impossible, and should not happen under any circumstance.
 \item When a new user registers with the system, the client should require that a master password be created (if the user does not already have one).
 \end{itemize}
