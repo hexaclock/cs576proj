@@ -7,9 +7,9 @@
  */
 bool is_number(const std::string& s)
 {
-	std::string::const_iterator it = s.begin();
-	while (it != s.end() && std::isdigit(*it)) ++it;
-	return !s.empty() && it == s.end();
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
 }
 
 
@@ -66,7 +66,7 @@ bool prompt_y_n(std::string question, std::string ans_default)
             return false;
         else
             std::cout << "Please type 'yes' or 'no': ";
-
+        
         getline(std::cin, res);
         std::cin.sync();
         std::transform(res.begin(), res.end(), res.begin(), ::tolower);
@@ -75,14 +75,12 @@ bool prompt_y_n(std::string question, std::string ans_default)
 
 bool isValidInput(const std::string &input)
 {
-	if (input.size() > 64)
-		return false;
-	for (int i = 0; i < (int)input.size(); i++)
-	{
-		if (input[i] == '\"' || input[i] == '\\' || input[i] == '\'' || input[i] == ':')
-			return false;
-	}
-	return true;
+    for (int i = 0; i < (int)input.size(); i++)
+    {
+        if (input[i] == '\"')
+            return false;
+    }
+    return true;
 }
 
 /* pre: takes in the input password
@@ -90,19 +88,8 @@ bool isValidInput(const std::string &input)
  */
 int isSecurePassword(const std::string &password)
 {
-    int number = 0, lowerCase = 0, upperCase = 0;
-	if (password.size() < 8 || password.size() > 24)
-		return 1;
-	for (int i = 0; i < (int)password.size(); i++)
-	{
-		if ( password[i] >= '0' && password[i] <= '9' )
-			number = 1;
-		else if ( password[i] >= 'A' && password[i] <= 'Z')
-			upperCase = 4;
-		else if ( password[i] >= 'a' && password[i] <= 'z')
-			lowerCase = 2;
-		if ((number ^ lowerCase ^ upperCase) == 7)
-			return 0;
-	}
-    return 2;
+    if (password.size() < 8)
+        return 1;
+
+    return 0;
 }

@@ -1,6 +1,7 @@
 {
    "users" : {
       "danv" : {
+         "loginattempts" : 0,
          "salt" : "j588+ycAz4Ix9LKQ3GOzqQ==",
          "secret" : "14QT7Tj/d3yqhKKdJ/1q8Yr8zfOb5RAQDV0NQOKOzbQ="
       },
@@ -21,10 +22,15 @@
          "salt" : "G//XulBif3pIetab76eEWQ==",
          "secret" : "EYzTHghZg391qFNz56szSPJHFtoflKyGXd0nrZzsVtw="
       },
+      "tester1" : {
+         "loginattempts" : 0,
+         "salt" : "uqSpLEHadFCXPw/yT9fMIA==",
+         "secret" : "RE0UTBcOR39kYJx7BkKSHr1v+vIGY0Q6AvlXyF+rM/c="
+      },
       "testuser" : {
          "loginattempts" : 0,
-         "salt" : "Usi1Ea1pQqV/BGAxRiFMgg==",
-         "secret" : "7nQ0WWybeOhYkgZbrBAinG+i7VnJgTHNq0EOu0t/FHc="
+         "salt" : "5X8TYtBRU2gyo8B0Oy1SUw==",
+         "secret" : "qr0B1Z+BnJqQLAuFWXsIS3f+wW0Pw8j5LgewmSEPK1k="
       }
    }
 }

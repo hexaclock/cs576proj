@@ -55,11 +55,11 @@ std::vector<std::string> numRefs; //interactive number references for entries
  */
 void logger(const std::string action)
 {
-	time_t now = time(0);
-	char *date = ctime(&now);
-	std::ofstream log(logfile, std::ios_base::app | std::ios_base::out);
-	log << username << " | " << action << " | " << date;
-	log.close();
+    time_t now = time(0);
+    char *date = ctime(&now);
+    std::ofstream log(logfile, std::ios_base::app | std::ios_base::out);
+    log << username << " | " << action << " | " << date;
+    log.close();
 }
 
 /* pre: takes in an std::string msg and int code
@@ -147,7 +147,7 @@ void add_entry(Json::Value *passdb, int randlen)
 		std::cout << "Service : ";
 		std::getline(std::cin, service);
 		if (!isValidInput(service))
-			std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+                    std::cout << "Input cannot contain a \" " << std::endl;
 		std::cin.sync();
 	} while (!isValidInput(service));
 
@@ -156,7 +156,7 @@ void add_entry(Json::Value *passdb, int randlen)
 		std::cout << "Username: ";
 		std::getline(std::cin, username);
 		if (!isValidInput(username))
-			std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+                    std::cout << "Input cannot contain a \" " << std::endl;
 		std::cin.sync();
 	} while (!isValidInput(username));
 
@@ -165,7 +165,7 @@ void add_entry(Json::Value *passdb, int randlen)
 		std::cout << "Notes   : ";
 		std::getline(std::cin, notes);
 		if (!isValidInput(notes))
-			std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+                    std::cout << "Input cannot contain a \" " << std::endl;
 		std::cin.sync();
 	} while (!isValidInput(notes));
 
@@ -176,17 +176,17 @@ void add_entry(Json::Value *passdb, int randlen)
     }
     else
     {
-		do
-		{
-			std::cout << "Password: ";
-			hideterm();
-			std::getline(std::cin, password);
-			showterm();
-			if (!isValidInput(password))
-				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-			std::cin.sync();
-		} while (!isValidInput(password));
-		std::cout << std::endl;
+        do
+        {
+            std::cout << "Password: ";
+            hideterm();
+            std::getline(std::cin, password);
+            showterm();
+            if (!isValidInput(password))
+                std::cout << "Input cannot contain a \" " << std::endl;
+            std::cin.sync();
+        } while (!isValidInput(password));
+        std::cout << std::endl;
     }
 
     entry = service + "_" + username;
@@ -203,7 +203,7 @@ void add_entry(Json::Value *passdb, int randlen)
         (*passdb)["dbentry"][entry]["password"] = password;
         (*passdb)["dbentry"][entry]["notes"] = notes;
     }
-	logger("add " + entry);
+    logger("add " + entry);
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -257,7 +257,7 @@ void print_entry(Json::Value *passdb, std::string dbentry_key, bool show_pass, i
 
     std::cout << line << std::endl;
 
-	logger("print entry");
+    logger("print entry");
 }
 
 /* pre: takes in a Json::Value* passdb and a std::string request
@@ -276,7 +276,7 @@ void get_entry(Json::Value *passdb, std::string request)
             print_entry(passdb, request, true, 0); //show passwords when requesting a specific entry
         else
             std::cout << "No such entry, please check your input" << std::endl;
-		logger("get " + request);
+        logger("get " + request);
     }
     else /* get all */
     {
@@ -356,8 +356,8 @@ void search(Json::Value *passdb, std::string pattern)
         notes = Json::writeString(builder, val);
 
         if (service.find(pattern) != std::string::npos ||
-                username.find(pattern) != std::string::npos ||
-                notes.find(pattern) != std::string::npos)
+            username.find(pattern) != std::string::npos ||
+            notes.find(pattern) != std::string::npos)
         {
             print_entry(passdb, key, false, i);
             continue;
@@ -411,7 +411,7 @@ void clip(Json::Value *passdb, std::string request)
     }
     else
         std::cout << "Entry doesn't exist!" << std::endl;
-	logger("clip " + request); 
+    logger("clip " + request); 
 }
 
 /* pre: takes in int argc and std::vector<std::string> argv, the first item of
@@ -445,7 +445,7 @@ int delete_entry(Json::Value *passdb, std::string request)
     if ((*passdb)["dbentry"].isMember(request))
     {
         (*passdb)["dbentry"].removeMember(request);
-		logger("delete " + request);
+        logger("delete " + request);
         return 0;
     }
     else
@@ -464,11 +464,11 @@ void parse_delete(int argc, std::vector<std::string> argv)
     if (argc == 3)
     {
         if (prompt_y_n("Are you sure you wish to delete "
-                    + (std::string)argv[1] + "_" + (std::string)argv[2] + "?",
-                    ""))
+                       + (std::string)argv[1] + "_" + (std::string)argv[2] + "?",
+                       ""))
         {
             int ret = delete_entry(&passdb, (std::string)argv[1] +
-                    "_" + (std::string)argv[2]);
+                                   "_" + (std::string)argv[2]);
             if (ret == 0)
             {
                 std::cout << "Entry deleted" << std::endl;
@@ -482,8 +482,8 @@ void parse_delete(int argc, std::vector<std::string> argv)
         if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
         {
             if (prompt_y_n("Are you sure you wish to delete "
-                        + numRef + "?",
-                        ""))
+                           + numRef + "?",
+                           ""))
             {
                 int ret = delete_entry(&passdb, numRef);
                 if (ret == 0)
@@ -520,37 +520,39 @@ int update_entry(Json::Value *passdb, std::string request)
     service = temp.substr(0, temp.find(delimiter));
     temp.erase(0, temp.find(delimiter) + delimiter.length());
     username = temp;
-
+    
     if ((*passdb)["dbentry"].isMember(request))
     {
-		do
-		{
-			std::cout << "Password: ";
-			hideterm();
-			std::getline(std::cin, password);
-			showterm();
-			if (!isValidInput(password))
-				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-			std::cin.sync();
-		} while (!isValidInput(password));
-		std::cout << std::endl;
-		do
-		{
-			std::cout << "Notes   : ";
-			std::getline(std::cin, notes);
-			if (!isValidInput(notes))
-				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-			std::cin.sync();
-		} while (!isValidInput(notes));
+        do
+        {
+            std::cout << "Password: ";
+            hideterm();
+            std::getline(std::cin, password);
+            showterm();
+            if (!isValidInput(password))
+                std::cout << "Input cannot contain a \" " << std::endl;
+            std::cin.sync();
+        } while (!isValidInput(password));
 
+        std::cout << std::endl;
+        
+        do
+        {
+            std::cout << "Notes   : ";
+            std::getline(std::cin, notes);
+            if (!isValidInput(notes))
+                std::cout << "Input cannot contain a \" " << std::endl;
+            std::cin.sync();
+        } while (!isValidInput(notes));
+        
         entry = request;
-
+        
         (*passdb)["dbentry"][entry]["service"] = service;
         (*passdb)["dbentry"][entry]["username"] = username;
         (*passdb)["dbentry"][entry]["password"] = password;
         (*passdb)["dbentry"][entry]["notes"] = notes;
-
-		logger("update " + request);
+        
+        logger("update " + request);
         return 0;
     }
     else
@@ -633,44 +635,46 @@ void parse_chpass(int argc, std::vector<std::string> argv)
     std::string confirmnewpass;
     int ret;
 
-	logger("change password");
+    logger("change password");
     if (checkpass(dbpass))
     {
         do
-		{
-			std::cout << "New password: ";
-			hideterm();
-			std::getline(std::cin, newpass);
-			showterm();
-			if (!isValidInput(newpass))
-				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-			std::cin.sync();
-		} while (!isValidInput(newpass));
-		std::cout << std::endl;
+        {
+            std::cout << "New password: ";
+            hideterm();
+            std::getline(std::cin, newpass);
+            showterm();
+            if (!isValidInput(newpass))
+                std::cout << "Input cannot contain a \" " << std::endl;
+            std::cin.sync();
+        } while (!isValidInput(newpass));
 
-		int temp = isSecurePassword(newpass);
-		while (temp != 0)
-		{
-			if (temp == 1)
-				std::cout << "The length should range from 8 to 24" << std::endl;
-			else if(temp == 2)
-				std::cout << "Password must contains at least 1 number, 1 uppercase character and 1 lowercase character" << std::endl;
-			std::cout << "New database password: ";
-			hideterm();
-			std::getline(std::cin, newpass);
-			showterm();
-			std::cin.sync();
-			std::cout << std::endl;
-			temp = isSecurePassword(newpass);
-		}
-
-		std::cout << "Retype new password: ";
-		hideterm();
-		std::getline(std::cin, confirmnewpass);
-		showterm();
-		std::cin.sync();
-		std::cout << std::endl;
-
+        std::cout << std::endl;
+        
+        int temp = isSecurePassword(newpass);
+        while (temp != 0)
+        {
+            if (temp == 1)
+            {
+                std::cout << "Please choose a password with a length greater than 8" 
+                          << std::endl;
+            }
+            std::cout << "New database password: ";
+            hideterm();
+            std::getline(std::cin, newpass);
+            showterm();
+            std::cin.sync();
+            std::cout << std::endl;
+            temp = isSecurePassword(newpass);
+        }
+        
+        std::cout << "Retype new password: ";
+        hideterm();
+        std::getline(std::cin, confirmnewpass);
+        showterm();
+        std::cin.sync();
+        std::cout << std::endl;
+        
         if (newpass == confirmnewpass)
         {
             secretKey = KLCrypto::sha256sum(dbpass);
@@ -797,7 +801,7 @@ void parse_tls_send(int argc, std::vector<std::string> argv)
 
         if ( (ret = tls_send(srvname, atoi(srvport.c_str()), data, dbpath)) != 0 )
             std::cout<<"Failed to upload database to server"<<std::endl;
-		logger("upload local database");
+        logger("upload local database");
     }
 }
 
@@ -829,8 +833,8 @@ std::vector<std::string> read_input()
     std::getline(std::cin, line);
     std::stringstream iss(line);
     copy(std::istream_iterator<std::string>(iss),
-            std::istream_iterator<std::string>(),
-            std::back_inserter(vect));
+         std::istream_iterator<std::string>(),
+         std::back_inserter(vect));
 
     return vect;
 }
@@ -847,8 +851,8 @@ bool parse_command(int argc, std::vector<std::string> argv)
     else if (argv[0] == "add")
         parse_add(argc, argv);
     else if (argv[0] == "get" ||
-            argv[0] == "list" ||
-            argv[0] == "print" ||
+             argv[0] == "list" ||
+             argv[0] == "print" ||
              argv[0] == "ls")
         parse_get(argc, argv);
     else if (argv[0] == "search")
@@ -923,9 +927,6 @@ bool validate_portnum(const std::string &portstr)
 
 bool validate_username(const std::string &uname)
 {
-    if (uname.size() > 64)
-        return false;
-
     for (int i=0; i<(int)uname.size(); ++i)
     {
         if (!isalnum(uname[i]) && uname[i] != '-'
@@ -969,8 +970,8 @@ int main()
 
     newfile = !local_db_exists(kldir,dbpath);
 
-	//log file name
-	logfile = kldir + "/" + "logfile.txt";
+    //log file name
+    logfile = kldir + "/" + "logfile.txt";
 
     if (newfile)
     {
@@ -988,8 +989,10 @@ int main()
                 std::cout << "Server port: ";
                 std::getline(std::cin, srvport);
                 if (!validate_portnum(srvport))
+                {
                     std::cout << "Invalid port"
                               << std::endl;
+                }
             } while (!validate_portnum(srvport));
 
             do
@@ -997,8 +1000,10 @@ int main()
                 std::cout << "Server username: ";
                 std::getline(std::cin, srvuname);
                 if (!validate_username(srvuname))
+                {
                     std::cout << "Username must be alphanumeric"
                               << std::endl;
+                }
             } while (!validate_username(srvuname));
 
             std::cout << "Password: ";
@@ -1025,41 +1030,43 @@ int main()
         else //create new database
         {
             std::cout << "Creating new local database..." << std::endl;
-			do
-			{
-				std::cout << "New database password: ";
-				hideterm();
-				std::getline(std::cin, dbpass);
-				showterm();
-				if (!isValidInput(dbpass))
-					std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-				std::cin.sync();
-			} while (!isValidInput(dbpass));
-		    std::cout << std::endl;
-			
-			int temp = isSecurePassword(dbpass); 
-		    while (temp != 0)	
-			{
-				if (temp == 1)
-					std::cout << "The length should range from 8 to 24" << std::endl;
-				else if(temp == 2)
-					std::cout << "Password must contains at least 1 number, 1 uppercase character and 1 lowercase character" << std::endl;
-				std::cout << "New database password: ";
-				hideterm();
-				std::getline(std::cin, dbpass);
-				showterm();
-				std::cin.sync();
-				std::cout << std::endl;
-				temp = isSecurePassword(dbpass);
-			} 
-			do
-			{
-				std::cout << "Server hostname: ";
-				std::getline(std::cin, srvname);
-				if (!isValidInput(srvname))
-					std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-			} while (!isValidInput(srvname));
-
+            do
+            {
+                std::cout << "New database password: ";
+                hideterm();
+                std::getline(std::cin, dbpass);
+                showterm();
+                if (!isValidInput(dbpass))
+                    std::cout << "Input cannot contain a \" " << std::endl;
+                std::cin.sync();
+            } while (!isValidInput(dbpass));
+            
+            std::cout << std::endl;
+            
+            int temp = isSecurePassword(dbpass); 
+            while (temp != 0)	
+            {
+                if (temp == 1)
+                {
+                    std::cout << "Please choose a password with a length greater than 8" 
+                              << std::endl;
+                }
+                std::cout << "New database password: ";
+                hideterm();
+                std::getline(std::cin, dbpass);
+                showterm();
+                std::cin.sync();
+                std::cout << std::endl;
+                temp = isSecurePassword(dbpass);
+            } 
+            do
+            {
+                std::cout << "Server hostname: ";
+                std::getline(std::cin, srvname);
+                if (!isValidInput(srvname))
+                    std::cout << "Input cannot contain a \" " << std::endl;
+            } while (!isValidInput(srvname));
+            
             do
             {
                 std::cout << "Server port: ";
@@ -1099,17 +1106,17 @@ int main()
     else
     {
         std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
-		do
-		{
-			std::cout << "Database password: ";
-			hideterm();
-			std::getline(std::cin, dbpass);
-			showterm();
-			if (!isValidInput(dbpass))
-				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
-		} while (!isValidInput(dbpass));
+        do
+        {
+            std::cout << "Database password: ";
+            hideterm();
+            std::getline(std::cin, dbpass);
+            showterm();
+            if (!isValidInput(dbpass))
+                std::cout << "Input cannot contain a \" " << std::endl;
+        } while (!isValidInput(dbpass));
     }
-
+    
     if (!newfile)
     {
         if (!JsonParsing::readJson(&passdb,dbpath,dbpass))
