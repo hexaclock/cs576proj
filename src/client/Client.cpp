@@ -142,32 +142,50 @@ void add_entry(Json::Value *passdb, int randlen)
     std::string password;
     std::string notes;
     std::string entry;
+	do
+	{
+		std::cout << "Service : ";
+		std::getline(std::cin, service);
+		if (!isValidInput(service))
+			std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+		std::cin.sync();
+	} while (!isValidInput(service));
 
-    std::cout << "Service:  ";
-    std::getline(std::cin,service);
-    std::cin.sync();
+   	do
+	{
+		std::cout << "Username: ";
+		std::getline(std::cin, username);
+		if (!isValidInput(username))
+			std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+		std::cin.sync();
+	} while (!isValidInput(username));
 
-    std::cout << "Username: ";
-    std::getline(std::cin,username);
-    std::cin.sync();
-
-    std::cout << "Notes:    ";
-    std::getline(std::cin,notes);
-    std::cin.sync();
+   	do
+	{
+		std::cout << "Notes   : ";
+		std::getline(std::cin, notes);
+		if (!isValidInput(notes))
+			std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+		std::cin.sync();
+	} while (!isValidInput(notes));
 
     if (randlen > 0)
     {
         password = gen(randlen);
-        std::cout << "Password :" << std::endl << password;
+        std::cout << "Password: " << std::endl << password;
     }
     else
     {
-        std::cout << "Password: ";
-        hideterm();
-        std::getline(std::cin,password);
-        showterm();
-        std::cin.sync();
-        std::cout << std::endl;
+		do
+		{
+			std::cout << "Password: ";
+			hideterm();
+			std::getline(std::cin, password);
+			showterm();
+			if (!isValidInput(password))
+				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			std::cin.sync();
+		} while (!isValidInput(password));
     }
 
     entry = service + "_" + username;
@@ -504,16 +522,25 @@ int update_entry(Json::Value *passdb, std::string request)
 
     if ((*passdb)["dbentry"].isMember(request))
     {
-        std::cout << "Password: ";
-        hideterm();
-        std::getline(std::cin,password);
-        showterm();
-        std::cin.sync();
-
-        std::cout << "\nNotes:    ";
-        std::getline(std::cin,notes);
-        std::cout << "\n";
-        std::cin.sync();
+		do
+		{
+			std::cout << "Password: ";
+			hideterm();
+			std::getline(std::cin, password);
+			showterm();
+			if (!isValidInput(password))
+				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			std::cin.sync();
+		} while (!isValidInput(password));
+		std::cout << std::endl;
+		do
+		{
+			std::cout << "Notes   : ";
+			std::getline(std::cin, notes);
+			if (!isValidInput(notes))
+				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			std::cin.sync();
+		} while (!isValidInput(notes));
 
         entry = request;
 
@@ -584,6 +611,7 @@ bool checkpass(std::string curpass)
     hideterm();
     std::getline(std::cin,testpass);
     showterm();
+	std::cout << std::endl;
 
     if (testpass == curpass)
     {
@@ -607,14 +635,30 @@ void parse_chpass(int argc, std::vector<std::string> argv)
 	logger("change password");
     if (checkpass(dbpass))
     {
-        std::cout << std::endl << "New password: ";
-        hideterm();
-        std::getline(std::cin,newpass);
-        showterm();
-        std::cout << std::endl << "Retype new password: ";
-        hideterm();
-        std::getline(std::cin,confirmnewpass);
-        showterm();
+        do
+		{
+			std::cout << "New password: ";
+			hideterm();
+			std::getline(std::cin, newpass);
+			showterm();
+			if (!isValidInput(newpass))
+				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			std::cin.sync();
+		} while (!isValidInput(newpass));
+		std::cout << std::endl;
+
+        do
+		{
+			std::cout << "Retype new password: ";
+			hideterm();
+			std::getline(std::cin, confirmnewpass);
+			showterm();
+			if (!isValidInput(confirmnewpass))
+				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			std::cin.sync();
+		} while (!isValidInput(confirmnewpass));
+        std::cout << std::endl;
+
         if (newpass == confirmnewpass)
         {
             secretKey = KLCrypto::sha256sum(dbpass);
@@ -969,15 +1013,23 @@ int main()
         else //create new database
         {
             std::cout << "Creating new local database..." << std::endl;
-
-            std::cout << "New database password: ";
-            hideterm();
-            std::getline(std::cin, dbpass);
-            showterm();
-            std::cout << std::endl;
-
-            std::cout << "Server hostname: ";
-            std::getline(std::cin, srvname);
+			do
+			{
+				std::cout << "New database password: ";
+				hideterm();
+				std::getline(std::cin, dbpass);
+				showterm();
+				if (!isValidInput(dbpass))
+					std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			} while (!isValidInput(dbpass));
+		    std::cout << std::endl;
+			do
+			{
+				std::cout << "Server hostname: ";
+				std::getline(std::cin, srvname);
+				if (!isValidInput(srvname))
+					std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+			} while (!isValidInput(srvname));
 
             do
             {
@@ -1018,11 +1070,15 @@ int main()
     else
     {
         std::cout << "Found KeyLocker directory at: " << kldir << std::endl;
-        std::cout << "Database password: ";
-        hideterm();
-        std::getline(std::cin,dbpass);
-        showterm();
-        std::cout << std::endl;
+		do
+		{
+			std::cout << "Database password: ";
+			hideterm();
+			std::getline(std::cin, dbpass);
+			showterm();
+			if (!isValidInput(dbpass))
+				std::cout << "Input cannot contains \" \\ \' : " << std::endl;
+		} while (!isValidInput(dbpass));
     }
 
     if (!newfile)

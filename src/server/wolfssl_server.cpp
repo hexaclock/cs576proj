@@ -590,6 +590,7 @@ int main(int argc, char **argv)
         else
         {
             std::cout << "Ok, please specify an existing user database" << std::endl;
+			std::cout<<"Usage: "<<argv[0]<<" <port #> <certfile> <privkey> [userdb]"<<std::endl;
             return -1;
         }
     }

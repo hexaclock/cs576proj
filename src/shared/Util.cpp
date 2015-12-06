@@ -72,3 +72,15 @@ bool prompt_y_n(std::string question, std::string ans_default)
         std::transform(res.begin(), res.end(), res.begin(), ::tolower);
     } while (1);
 }
+
+bool isValidInput(const std::string &input)
+{
+	if (input.size() > 64)
+		return false;
+	for (int i = 0; i < (int)input.size(); i++)
+	{
+		if (input[i] == '\"' || input[i] == '\\' || input[i] == '\'' || input[i] == ':')
+			return false;
+	}
+	return true;
+}
