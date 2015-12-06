@@ -25,24 +25,24 @@
 \ProposalSection{Brief}
 
 \noindent
-Too many passwords to remember? Need a way to share passwords within your organization without emailing them around? KeyLocker can help you. KeyLocker is a safe for all of your keys, passwords, and other sensitive data. Group-based ACLs and associated encryption keys govern what passwords a member of your organization has access to. For your convenience, KeyLocker can also generate strong passwords on-the-fly.
+Too many passwords to remember? Need a way to share passwords within your organization without emailing them around? KeyLocker can help you. KeyLocker is a safe for all of your keys, passwords, and other sensitive data. For your convenience, KeyLocker can also generate strong passwords on-the-fly.
 \smallskip
 
 \ProposalSection{Key Features}
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item Use AES with 256 bit encryption keys to give your passwords and other data a high level of security.
-\item Public key crypto-based authentication and encryption.
-\item Securely and effortlessly share accounts/passwords with other members of your organization.
-\item Read-only access to an offline copy of the database.
-\item Audit logging in order to establish a legal “paper” trail.
+    \item Use AES with 256 bit encryption keys to give your passwords and other data a high level of security.
+    \item Public key crypto-based authentication and encryption.
+    \item Securely and effortlessly share accounts/passwords with other members of your organization.
+    \item Read-only access to an offline copy of the database.
+    \item Audit logging in order to establish a legal “paper” trail.
 \end{itemize}
 
 \ProposalSection{Security Elements}
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
-\item \textbf{AES-256 encryption: }Data is before it is transferred between the client and the server.
-\item \textbf{Access control: }Users can access their personal data and modify their information. A user can also access the passwords which belong to their security group(s), but such access is subject to restrictions as set forth by the ACL associated with each group. Access to a group and its passwords are granted by the group’s administrator (by default, the user who created the group). There is also to be a database-wide administrator that will have the ability to add and disable/delete users, but will not be able to access any information for which access has not been explicitly granted by a group administrator.
-\item \textbf{Auto-lock \& audit report: }Each time a password is viewed, edited, or deleted the system will record the time and a log of the operation. \textit{(Bonus: The system will be locked automatically if there is no operation for more than 2 minutes; if an account tries to access the system and the authentication process fails a user-configurable number of times, it will be locked out. That user can ask a system administrator or go through the automated system to unlock it.)}
-\item \textbf{Password generator: }The client can generate a complex password by using a combination of numbers, letters, and symbols. The user can specify the length and what to be included in the password.
+    \item \textbf{AES-256 encryption: }Data is encrypted before it is transferred between the client and the server.
+    \item \textbf{Access control: }Users can access their personal data and modify their information.
+    \item \textbf{Auto-lock \& audit report: }Each time a password is viewed, edited, or deleted the system will record the time and a log of the operation. \textit{(Bonus: The system will be locked automatically if an account tries to access the system and the authentication process fails a user-configurable number of times. That user can ask a system administrator to unlock it.)}
+    \item \textbf{Password generator: }The client can generate a complex password by using a combination of numbers, letters, and symbols. The user can specify the length and what to be included in the password.
 \end{itemize}
 
 \ProposalSection{Description}
@@ -50,6 +50,4 @@ Too many passwords to remember? Need a way to share passwords within your organi
 Users interact directly with the client-side application. One key function is that users can add items and view their saved passwords after they login. Each item includes a username, password, and description of the item (name of service, additional notes, etc.).
 
 Once a request is received from the client, the server checks the account name and then uses the private key of that user to decrypt this message. The system should save items by utilizing per-user JSON files instead of a traditional SQL database. As a nice side effect, this will allow the client-side application to access a locally cached version of the JSON file associated with the user’s account and thus give the system basic offline functionality.
-
-In order to share passwords, a user must first create a group and add other users to the group’s ACL. Any passwords stored in this group will be accessible only by the owner and users listed in the per-group ACL. Such an implementation of a password-sharing feature also fits well into many organizations that have departments, teams, and other similar structures that often need to access the same services.
 \end{document}
