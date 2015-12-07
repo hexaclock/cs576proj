@@ -309,7 +309,9 @@ void parse_get(int argc, std::vector<std::string> argv)
         get_entry(&passdb, (std::string)argv[1] + "_" + (std::string)argv[2]);
     else if (argc == 2 && is_number(argv[1])) /* get numRef */
     {
-        if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
+		if (argv[1].size() > 9)
+			std::cout << "Number reference error" << std::endl;
+		else if (!(numRef = get_numRef(std::stoi(argv[1]) - 1)).empty())
             get_entry(&passdb, numRef);
         else
             std::cout << "Number reference error" << std::endl;
