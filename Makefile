@@ -1,5 +1,5 @@
 PROJECT = cs576_project
-STAGE 	= beta
+STAGE 	= final
 MAKE    = make
 DOC 	= ./doc/
 SRC 	= ./src/
